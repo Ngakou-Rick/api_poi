@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,13 +25,14 @@ import lombok.Setter;
 @Table(name = "points_of_interest")
 @Getter
 @Setter
+@Data
 @NoArgsConstructor
 public class Poi {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "UUID default gen_random_uuid()") // Ou
                                                                                                                    // GenerationType.SEQUENCE
-    private UUID id;
+    private UUID poiId;
 
     @Column(nullable = false)
     private String name;
@@ -93,6 +95,10 @@ public class Poi {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public UUID getPoiId(){
+        return poiId;
     }
 
 }

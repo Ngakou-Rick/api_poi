@@ -19,7 +19,7 @@ import java.util.UUID;
 public class PoiDTO {
 
     @Schema(description = "Unique identifier of the Point of Interest", example = "123e4567-e89b-12d3-a456-426614174000", accessMode = Schema.AccessMode.READ_ONLY)
-    private UUID id;
+    private UUID poiId;
 
     @NotBlank(message = "Name cannot be blank")
     @Size(max = 255)
@@ -73,10 +73,10 @@ public class PoiDTO {
     private String website;
 
     // Constructeur optionnel
-    public PoiDTO(UUID id, String name, String country, String city, String description, String category,
+    public PoiDTO(UUID poiId, String name, String country, String city, String description, String category,
             Double latitude, Double longitude, String address, String informalAddress,
             List<String> catalogue, List<String> openingHours, String contactInfo, String website) {
-        this.id = id;
+        this.poiId = poiId;
         this.name = name;
         this.country = country;
         this.city = city;

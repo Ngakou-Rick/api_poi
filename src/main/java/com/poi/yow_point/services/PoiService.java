@@ -6,7 +6,7 @@ import com.poi.yow_point.interfaces.PoiInterface;
 import com.poi.yow_point.interfaces.PoiMapper;
 import com.poi.yow_point.models.Poi;
 import com.poi.yow_point.repositories.PoiRepository;
-// Retire les imports JTS directs s'ils ne sont plus utilisés ici
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,8 +86,7 @@ public class PoiService implements PoiInterface {
                 });
     }
 
-    // ... les autres méthodes de recherche restent inchangées car elles utilisent
-    // toDtoList ...
+    
     @Override
     @Transactional(readOnly = true)
     public Optional<PoiDTO> getPoiById(UUID id) {
