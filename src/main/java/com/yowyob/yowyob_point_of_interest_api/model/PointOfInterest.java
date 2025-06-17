@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Point;
 
 
 import java.time.OffsetDateTime;
@@ -71,9 +72,8 @@ public class PointOfInterest {
     @Column(name = "poi_images", columnDefinition = "text[]")
     private List<String> poiImages; // Tableau d'URLs
 
-    // TODO: Implement proper PostGIS GEOGRAPHY(Point, 4326) handling. Using String for now.
-    @Column(name = "location_geog", nullable = false)
-    private String locationGeog;
+    @Column(name = "location_geog", nullable = false, columnDefinition = "geography(Point,4326)")
+    private org.locationtech.jts.geom.Point locationGeog;
 
     @Embedded
     private AddressType poiAddress; // Adresse structurée
