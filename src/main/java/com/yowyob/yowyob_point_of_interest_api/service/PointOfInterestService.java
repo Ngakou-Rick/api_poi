@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -44,6 +45,7 @@ public class PointOfInterestService {
         this.appUserRepository = appUserRepository;
     }
 
+    @Transactional
     public PointOfInterestDTO savePoi(PointOfInterestDTO poiDTO) {
         log.info("Saving POI: {}", poiDTO.getPoiName());
         PointOfInterest poi = poiMapper.toEntity(poiDTO);
@@ -94,6 +96,7 @@ public class PointOfInterestService {
         return pointOfInterestRepository.findByPoiCategory(category).stream().map(poiMapper::toDTO).collect(Collectors.toList());
     }
 
+    @Transactional
     public PointOfInterestDTO updatePoi(UUID id, PointOfInterestDTO poiDetailsDTO) {
         log.info("Attempting to update POI with ID: {}", id);
         PointOfInterest poi = pointOfInterestRepository.findById(id)
@@ -170,6 +173,7 @@ public class PointOfInterestService {
         return poiMapper.toDTO(updatedPoi);
     }
 
+    @Transactional
     public void deletePoi(UUID id) {
         log.info("Deleting POI by ID: {}", id);
         pointOfInterestRepository.deleteById(id);

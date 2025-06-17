@@ -4,9 +4,12 @@ import com.yowyob.yowyob_point_of_interest_api.model.PoiAccessLog;
 import com.yowyob.yowyob_point_of_interest_api.dto.PoiAccessLogDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring", uses = {PointOfInterestMapper.class, OrganizationMapper.class})
+@Mapper(componentModel = "spring",
+        uses = {PointOfInterestMapper.class, OrganizationMapper.class},
+        collectionMappingStrategy = CollectionMappingStrategy.SETTER_PREFERRED)
 public interface PoiAccessLogMapper {
     PoiAccessLogMapper INSTANCE = Mappers.getMapper(PoiAccessLogMapper.class);
 

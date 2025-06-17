@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class OrganizationService {
         this.organizationMapper = organizationMapper;
     }
 
+    @Transactional
     public OrganizationDTO saveOrganization(OrganizationDTO organizationDTO) {
         log.info("Saving organization: {}", organizationDTO.getOrgName());
         Organization organization = organizationMapper.toEntity(organizationDTO);
@@ -51,6 +53,7 @@ public class OrganizationService {
                                      .collect(Collectors.toList());
     }
 
+    @Transactional
     public OrganizationDTO updateOrganization(UUID id, OrganizationDTO organizationDTO) {
         log.info("Updating organization with ID: {}", id);
         Organization existingOrg = organizationRepository.findById(id)
@@ -68,7 +71,7 @@ public class OrganizationService {
         return organizationMapper.toDTO(updatedOrg);
     }
 
-
+    @Transactional
     public void deleteOrganization(UUID id) {
         log.info("Deleting organization by ID: {}", id);
         organizationRepository.deleteById(id);

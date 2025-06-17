@@ -4,9 +4,10 @@ import com.yowyob.yowyob_point_of_interest_api.model.AppUser;
 import com.yowyob.yowyob_point_of_interest_api.dto.AppUserDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring", uses = {OrganizationMapper.class})
+@Mapper(componentModel = "spring", uses = {OrganizationMapper.class}, collectionMappingStrategy = CollectionMappingStrategy.SETTER_PREFERRED)
 public interface AppUserMapper {
     AppUserMapper INSTANCE = Mappers.getMapper(AppUserMapper.class);
 

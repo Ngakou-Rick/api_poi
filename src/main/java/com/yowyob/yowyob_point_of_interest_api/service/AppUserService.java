@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 // import org.springframework.security.crypto.password.PasswordEncoder; // If using Spring Security
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class AppUserService {
         // this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public AppUserDTO saveUser(AppUserDTO appUserDTO) {
         log.info("Saving user: {}", appUserDTO.getUsername());
         AppUser appUser = appUserMapper.toEntity(appUserDTO);
@@ -52,6 +54,7 @@ public class AppUserService {
         return appUserMapper.toDTO(savedUser);
     }
 
+    @Transactional
     public AppUserDTO updateUser(UUID id, AppUserDTO appUserDTO) {
         log.info("Updating user with ID: {}", id);
         AppUser existingUser = appUserRepository.findById(id)
@@ -100,6 +103,7 @@ public class AppUserService {
                                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteUser(UUID id) {
         log.info("Deleting user by ID: {}", id);
         appUserRepository.deleteById(id);

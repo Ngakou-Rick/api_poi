@@ -5,6 +5,7 @@ import com.yowyob.yowyob_point_of_interest_api.dto.PointOfInterestDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import java.util.List;
 import org.locationtech.jts.geom.Point;
@@ -13,7 +14,9 @@ import org.locationtech.jts.io.WKTWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Mapper(componentModel = "spring", uses = {AddressTypeMapper.class, ContactPersonTypeMapper.class, OrganizationMapper.class, AppUserMapper.class})
+@Mapper(componentModel = "spring",
+        uses = {AddressTypeMapper.class, ContactPersonTypeMapper.class, OrganizationMapper.class, AppUserMapper.class},
+        collectionMappingStrategy = CollectionMappingStrategy.SETTER_PREFERRED)
 public interface PointOfInterestMapper {
     Logger log = LoggerFactory.getLogger(PointOfInterestMapper.class);
     PointOfInterestMapper INSTANCE = Mappers.getMapper(PointOfInterestMapper.class);
