@@ -6,99 +6,151 @@ import java.util.List;
 import java.util.UUID;
 
 import org.locationtech.jts.geom.Point; // Importer le Point de JTS
-// import org.hibernate.annotations.UuidGenerator;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Entity
-@Table(name = "points_of_interest")
-@Getter
-@Setter
+import com.poi.yow_point.models.embeddable.AddressType;
+import com.poi.yow_point.models.embeddable.ContactPersonType;
+import io.hypersistence.utils.hibernate.type.array.ListArrayType; // Pour TEXT[]
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType; // Pour JSONB
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type; // Hibernate 6
+import org.hibernate.annotations.UpdateTimestamp;
+import org.locationtech.jts.geom.Point; // De hibernate-spatial / JTS
+
+
+import java.util.Map; // Pour JSONB
+
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "point_of_interest")
 public class Poi {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "UUID default gen_random_uuid()") // Ou
-                                                                                                                   // GenerationType.SEQUENCE
+    @Column(name = "poi_id")
     private UUID poiId;
 
-    @Column(nullable = false)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "org_id", nullable = false)
+    @NotNull
+    private Organization organization;
 
-    @Column(nullable = false, length = 100)
-    private String country; // ex:"Cameroun"
-    @Column(nullable = false, length = 100)
-    private String city; // ex: "Yaoundé"
+    @Column(name = "town_id") // Pourrait être une relation @ManyToOne si Town est une entité
+    private UUID townId;
 
-    @Column(length = 1000) // Exemple de contrainte de longueur
-    private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id") // Clé étrangère vers AppUser
+    private AppUser createdByUser;
 
-    @Column(nullable = false)
-    private String category; // Ex: "restaurant", "hospital", "museum"
+    @Column(name = "poi_name", nullable = false)
+    private String poiName;
 
-    // Mappage du champ géométrique pour PostGIS
-    // SRID 4326 est WGS 84 (coordonnées géographiques latitude/longitude)
-    @Column(name = "location", nullable = false, columnDefinition = "geometry(Point,4326)")
-    private Point location;
+    @Column(name = "poi_type", nullable = false)
+    private String poiType;
 
-    @Column(nullable = false)
-    private String address; // Adresse formelle
+    @Column(name = "poi_category", nullable = false)
+    private String poiCategory;
 
-    @Column(name = "informal_address", length = 500) // Adresse textuelle, optionnelle
-    private String informal_address; // Adresse textuelle
+    @Column(name = "poi_long_name")
+    private String poiLongName;
 
-    @Column
-    @ElementCollection
-    private List<String> catalogue = new ArrayList<>();
+    @Column(name = "poi_short_name")
+    private String poiShortName;
 
-    @Column(name = "opening_hours")
-    @ElementCollection // Pour stocker une liste de chaînes
-    private List<String> openingHours = new ArrayList<>(); // Heures d'ouverture
-    @Column(name = "contact_info") // Informations de contact
-    private String contactInfo;
-    @Column(name = "website") // Site web
-    private String website;
+    @Column(name = "poi_friendly_name")
+    private String poiFriendlyName;
 
+    @Column(name = "poi_description", columnDefinition = "TEXT")
+    private String poiDescription;
+
+    @Lob // Pour les données binaires volumineuses
+    @Column(name = "poi_logo")
+    private byte[] poiLogo; // BYTEA
+
+    @Type(ListArrayType.class) // Utilise hibernate-types pour mapper TEXT[] à List<String>
+    @Column(name = "poi_images", columnDefinition = "text[]")
+    private List<String> poiImages;
+
+    // Utilisation de l'Embeddable pour address_type
+    @Embedded
+    @AttributeOverrides({ // Nécessaire si les noms de colonnes dans AddressType ne correspondent pas exactement
+            @AttributeOverride(name = "streetNumber", column = @Column(name = "addr_street_number")), // Exemple de préfixe
+            // ... autres si AddressType est utilisé ailleurs avec d'autres noms de colonnes
+    })
+    private AddressType poiAddress; // Le nom du champ correspond au nom de colonne poi_address
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "website_url")
+    private String websiteUrl;
+
+    @Type(ListArrayType.class)
+    @Column(name = "poi_amenities", columnDefinition = "text[]")
+    private List<String> poiAmenities;
+
+    @Type(ListArrayType.class)
+    @Column(name = "poi_keywords", columnDefinition = "text[]")
+    private List<String> poiKeywords;
+
+    @Type(ListArrayType.class)
+    @Column(name = "poi_type_tags", columnDefinition = "text[]")
+    private List<String> poiTypeTags;
+
+    @Type(JsonBinaryType.class) // Utilise hibernate-types pour JSONB
+    @Column(name = "operation_time_plan", columnDefinition = "jsonb")
+    private Map<String, String> operationTimePlan; // Ou une classe plus structurée
+
+    // Utilisation de l'Embeddable pour la liste de contact_person_type[]
+    // C'est un peu plus complexe pour un tableau d'@Embeddable.
+    // Option 1: Utiliser JSONB pour stocker une liste d'objets contact.
+    @Type(JsonBinaryType.class)
+    @Column(name = "poi_contacts", columnDefinition = "jsonb")
+    private List<ContactPersonType> poiContacts; // Stocke une liste de ContactPersonType sérialisée en JSON
+
+    // Option 2 (plus complexe): Créer une UserType Hibernate pour contact_person_type[]
+    // Ou mapper vers une table séparée si la normalisation est préférée (comme vous l'avez fait pour poi_contact).
+
+    @Column(name = "popularity_score")
+    @Builder.Default
+    private Float popularityScore = 0.0f;
+
+    @NotNull
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private Boolean isActive = true;
+
+    @Column(name = "deactivation_reason", columnDefinition = "TEXT")
+    private String deactivationReason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deactivated_by_user_id")
+    private AppUser deactivatedByUser;
+
+    @Column(name = "location_geog", nullable = false, columnDefinition = "geography(Point,4326)")
+    private Point locationGeog; // Type de JTS (hibernate-spatial)
+
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by_user_id")
+    private AppUser updatedByUser;
+
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Constructeur pour la création (sans ID, createdAt, updatedAt)
-    public Poi(String name, String description, String category, Point location, String address) {
-        this.name = name;
-        this.description = description;
-        this.category = category;
-        this.location = location;
-        this.address = address;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    public UUID getPoiId(){
-        return poiId;
-    }
-
+    // Relations inverses (optionnel, pour un accès facile depuis POI)
+    @OneToMany(mappedBy = "pointOfInterest", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PoiReview> reviews;
 }
