@@ -12,6 +12,6 @@ import java.util.UUID;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
     Page<Notification> findByRecipientUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
-    long countByRecipientUserIdAndReadAtIsNull(String userId); // Pour le badge de notifications non lues
+    long countByRecipientUserIdAndReadAtIsNull(UUID userId); // Pour le badge de notifications non lues
 }
 

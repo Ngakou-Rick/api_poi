@@ -81,12 +81,6 @@
     		<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 
-		 <!-- Spring Boot Starter Security (si vous gérez les rôles localement en plus de Keycloak) -->
-    	<dependency>
-        	<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-security</artifactId>
-    	</dependency>
-
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

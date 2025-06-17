@@ -23,8 +23,8 @@ public class NotificationController {
 
     @GetMapping("/me")
     public ResponseEntity<Page<NotificationPayload>> getMyNotifications(Principal principal, Pageable pageable) {
-        String userId = principal.getName();
-        Page<Notification> notifications = notificationService.getNotificationsForUser(userId, pageable);
+        UUID userId = UUID.fromString(principal.getName());
+        Page<Notification> notifications = notificationService.getNotificationsForUser(userId.toString(), pageable);
         // Mapper Notification vers NotificationPayload si nécessaire pour le client
         Page<NotificationPayload> payloadPage = notifications.map(n -> NotificationPayload.builder()
                 .id(n.getNotificationId())
@@ -40,9 +40,9 @@ public class NotificationController {
 
     @PostMapping("/{notificationId}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable UUID notificationId, Principal principal) {
-        String userId = principal.getName();
+        UUID userId = UUID.fromString(principal.getName());
         try {
-            notificationService.markNotificationAsRead(notificationId, userId);
+            notificationService.markNotificationAsRead(notificationId, userId.toString());
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(403).build(); // Ou 404
@@ -51,7 +51,7 @@ public class NotificationController {
 
     @GetMapping("/me/unread-count")
     public ResponseEntity<Long> getMyUnreadNotificationCount(Principal principal) {
-        String userId = principal.getName();
+        UUID userId = UUID.fromString(principal.getName());
         return ResponseEntity.ok(notificationService.getUnreadNotificationCount(userId));
     }
 

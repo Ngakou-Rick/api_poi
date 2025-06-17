@@ -32,7 +32,7 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_user_id", nullable = false) // L'utilisateur qui reçoit
-    private User recipient;
+    private AppUser recipient;
 
     @Enumerated(EnumType.STRING)
     @NotNull

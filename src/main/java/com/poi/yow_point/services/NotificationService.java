@@ -12,9 +12,9 @@ import com.poi.yow_point.dto.NotificationPayload;
 import com.poi.yow_point.enums.NotificationChannel;
 import com.poi.yow_point.enums.NotificationType;
 import com.poi.yow_point.models.Notification;
-import com.poi.yow_point.models.User;
+import com.poi.yow_point.models.AppUser;
 import com.poi.yow_point.repositories.NotificationRepository;
-import com.poi.yow_point.repositories.UserRepository;
+import com.poi.yow_point.repositories.AppUserRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,14 +27,14 @@ import java.util.UUID;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository; // Si persisté
-    private final UserRepository userRepository;
+    private final AppUserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate; // Pour WebSocket
 
     // Méthode pour créer ET envoyer une notification
     @Transactional // Pour la persistance de la notification
-    public void createAndSendNotification(String recipientUserId, NotificationType type, String title, String content,
+    public void createAndSendNotification(UUID recipientUserId, NotificationType type, String title, String content,
                                           NotificationChannel channel, Map<String, Object> metadata) {
-        User recipient = userRepository.findById(recipientUserId)
+        AppUser recipient = userRepository.findById(recipientUserId)
                 .orElseThrow(() -> new RuntimeException("Recipient user not found: " + recipientUserId));
 
         Notification notification = Notification.builder()
@@ -63,7 +63,7 @@ public class NotificationService {
             switch (channel) {
                 case WEBSOCKET:
                     // Le 'username' pour sendToUser doit être le Principal.getName() de l'utilisateur cible
-                    messagingTemplate.convertAndSendToUser(recipient.getUserId(), "/queue/notifications", payload);
+                    messagingTemplate.convertAndSendToUser(recipient.getUserId().toString(), "/queue/notifications", payload);
                     log.info("Sent WebSocket notification to user {}: {}", recipientUserId, title);
                     actuallySent = true;
                     break;
@@ -114,7 +114,7 @@ public class NotificationService {
     }
 
      @Transactional(readOnly = true)
-    public long getUnreadNotificationCount(String userId) {
+    public long getUnreadNotificationCount(UUID userId) {
         return notificationRepository.countByRecipientUserIdAndReadAtIsNull(userId);
     }
 }
