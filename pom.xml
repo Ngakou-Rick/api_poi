@@ -27,10 +27,10 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>17</java.version>
+		<java.version>21</java.version>
 		<jts.version>1.19.0</jts.version>
 		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
-		<!-- lombok.version sera géré par spring-boot-starter-parent -->
+		<lombok.version>1.18.32</lombok.version>
 		<!-- spring-restdocs.version sera géré par spring-boot-starter-parent si spring-boot-starter-restdocs est utilisé, sinon définissez-le -->
 	</properties>
 	<dependencies>

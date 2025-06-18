@@ -6,13 +6,14 @@ import com.poi.yow_point.models.embeddable.AddressType;
 import com.poi.yow_point.models.embeddable.ContactPersonType;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-
+import org.locationtech.jts.geom.Point;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -75,8 +76,9 @@ public class PointOfInterest {
     private List<String> poiImages; // Tableau d'URLs
 
     // TODO: Implement proper PostGIS GEOGRAPHY(Point, 4326) handling. Using String for now.
-    @Column(name = "location_geog", nullable = false)
-    private String locationGeog; 
+    @NotNull(message = "Location geometry is required")
+    @Column(name = "location_geog", nullable = false, columnDefinition = "GEOGRAPHY(Point, 4326)")
+    private Point locationGeog; 
 
     @Embedded
     private AddressType poiAddress; // Adresse structurée
@@ -120,7 +122,7 @@ public class PointOfInterest {
 
     @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
-    private boolean isActive = true;
+    private Boolean isActive = true;
 
     @Column(name = "deactivation_reason")
     private String deactivationReason;

@@ -39,7 +39,7 @@ public class Organization {
 
     @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
-    private boolean isActive = true;
+    private Boolean isActive = true;
 
     @OneToMany(mappedBy = "organization")
     private Set<AppUser> users;

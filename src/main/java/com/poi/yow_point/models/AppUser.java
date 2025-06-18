@@ -46,7 +46,7 @@ public class AppUser {
 
     @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
-    private boolean isActive = true;
+    private Boolean isActive = true;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
     @Builder.Default
