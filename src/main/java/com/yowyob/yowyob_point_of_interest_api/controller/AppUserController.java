@@ -1,6 +1,6 @@
 package com.yowyob.yowyob_point_of_interest_api.controller;
 
-import com.yowyob.yowyob_point_of_interest_api.dto.AppUserDTO; // Changed
+import com.yowyob.yowyob_point_of_interest_api.dto.AppUserDTO;
 import com.yowyob.yowyob_point_of_interest_api.service.AppUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux; // Added
+import reactor.core.publisher.Mono; // Added
 
-import java.util.List;
+// import java.util.List; // Keep for getAllUsers if service returns List, but should be Flux - Removed
 import java.util.UUID;
 
 @RestController
@@ -39,11 +41,16 @@ public class AppUserController {
                          content = @Content(schema = @Schema(implementation = AppUserDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    public ResponseEntity<AppUserDTO> createUser(@RequestBody AppUserDTO appUserDTO) {
-        log.info("Received request to create user: {}", appUserDTO.getUsername());
-        AppUserDTO savedUser = appUserService.saveUser(appUserDTO);
-        log.info("User created with ID: {}", savedUser.getUserId());
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    public Mono<ResponseEntity<AppUserDTO>> createUser(@RequestBody AppUserDTO appUserDTO) {
+        log.info("Received reactive request to create user: {}", appUserDTO.getUsername());
+        return appUserService.saveUser(appUserDTO)
+            .map(savedUser -> new ResponseEntity<>(savedUser, HttpStatus.CREATED))
+            .doOnSuccess(response -> {
+                if (response.getBody() != null) {
+                    log.info("User created with ID: {}", response.getBody().getUserId());
+                }
+            })
+            .doOnError(e -> log.error("Error creating user: {}", appUserDTO.getUsername(), e));
     }
 
     @GetMapping("/{id}")
@@ -53,17 +60,12 @@ public class AppUserController {
                          content = @Content(schema = @Schema(implementation = AppUserDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public ResponseEntity<AppUserDTO> getUserById(@Parameter(description = "ID of the user to be retrieved") @PathVariable UUID id) {
-        log.info("Received request to get user by ID: {}", id);
+    public Mono<ResponseEntity<AppUserDTO>> getUserById(@Parameter(description = "ID of the user") @PathVariable UUID id) {
+        log.info("Received reactive request to get user by ID: {}", id);
         return appUserService.getUserById(id)
-                .map(user -> {
-                    log.info("Found user: {}", user.getUsername());
-                    return ResponseEntity.ok(user);
-                })
-                .orElseGet(() -> {
-                    log.warn("User not found for ID: {}", id);
-                    return ResponseEntity.notFound().build();
-                });
+            .map(ResponseEntity::ok)
+            .defaultIfEmpty(ResponseEntity.notFound().build())
+            .doOnError(e -> log.error("Error getting user ID: {}", id, e));
     }
 
     @GetMapping("/username/{username}")
@@ -73,17 +75,12 @@ public class AppUserController {
                          content = @Content(schema = @Schema(implementation = AppUserDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public ResponseEntity<AppUserDTO> getUserByUsername(@Parameter(description = "Username of the user to be retrieved") @PathVariable String username) {
-        log.info("Received request to get user by username: {}", username);
+    public Mono<ResponseEntity<AppUserDTO>> getUserByUsername(@Parameter(description = "Username") @PathVariable String username) {
+        log.info("Received reactive request to get user by username: {}", username);
          return appUserService.getUserByUsername(username)
-                .map(user -> {
-                    log.info("Found user: {}", user.getUsername());
-                    return ResponseEntity.ok(user);
-                })
-                .orElseGet(() -> {
-                    log.warn("User not found for username: {}", username);
-                    return ResponseEntity.notFound().build();
-                });
+            .map(ResponseEntity::ok)
+            .defaultIfEmpty(ResponseEntity.notFound().build())
+            .doOnError(e -> log.error("Error getting user by username: {}", username, e));
     }
 
     @GetMapping("/email/{email}")
@@ -93,28 +90,23 @@ public class AppUserController {
                          content = @Content(schema = @Schema(implementation = AppUserDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public ResponseEntity<AppUserDTO> getUserByEmail(@Parameter(description = "Email address of the user to be retrieved") @PathVariable String email) {
-        log.info("Received request to get user by email: {}", email);
+    public Mono<ResponseEntity<AppUserDTO>> getUserByEmail(@Parameter(description = "Email") @PathVariable String email) {
+        log.info("Received reactive request to get user by email: {}", email);
         return appUserService.getUserByEmail(email)
-                .map(user -> {
-                    log.info("Found user: {}", user.getUsername());
-                    return ResponseEntity.ok(user);
-                })
-                .orElseGet(() -> {
-                    log.warn("User not found for email: {}", email);
-                    return ResponseEntity.notFound().build();
-                });
+            .map(ResponseEntity::ok)
+            .defaultIfEmpty(ResponseEntity.notFound().build())
+            .doOnError(e -> log.error("Error getting user by email: {}", email, e));
     }
 
     @GetMapping
     @Operation(summary = "Get all users")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users",
                  content = @Content(schema = @Schema(implementation = AppUserDTO.class)))
-    public ResponseEntity<List<AppUserDTO>> getAllUsers() {
-        log.info("Received request to get all users");
-        List<AppUserDTO> users = appUserService.getAllUsers();
-        log.info("Returning {} users", users.size());
-        return ResponseEntity.ok(users);
+    public Flux<AppUserDTO> getAllUsers() { // Return Flux directly
+        log.info("Received reactive request to get all users");
+        return appUserService.getAllUsers()
+            .doOnComplete(() -> log.info("Finished streaming all users."))
+            .doOnError(e -> log.error("Error getting all users", e));
     }
 
     @PutMapping("/{id}")
@@ -125,18 +117,21 @@ public class AppUserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    public ResponseEntity<AppUserDTO> updateUser(
+    public Mono<ResponseEntity<AppUserDTO>> updateUser(
             @Parameter(description = "ID of the user to be updated") @PathVariable UUID id,
             @RequestBody AppUserDTO userDetailsDTO) {
-        log.info("Received request to update user with ID: {}", id);
-        try {
-            AppUserDTO updatedUser = appUserService.updateUser(id, userDetailsDTO);
-            log.info("User updated with ID: {}", updatedUser.getUserId());
-            return ResponseEntity.ok(updatedUser);
-        } catch (RuntimeException e){ // TODO: Specific exception
-            log.warn("Failed to update user with ID: {}. Reason: {}", id, e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        log.info("Received reactive request to update user with ID: {}", id);
+        return appUserService.updateUser(id, userDetailsDTO)
+            .map(ResponseEntity::ok)
+            .defaultIfEmpty(ResponseEntity.notFound().build())
+            .doOnSuccess(response -> {
+                if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                    log.info("User updated with ID: {}", response.getBody().getUserId());
+                } else if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    log.warn("User not found for update, ID: {}", id);
+                }
+            })
+            .doOnError(e -> log.error("Error updating user ID: {}", id, e));
     }
 
     @DeleteMapping("/{id}")
@@ -145,10 +140,11 @@ public class AppUserController {
             @ApiResponse(responseCode = "204", description = "User deleted successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public ResponseEntity<Void> deleteUser(@Parameter(description = "ID of the user to be deleted") @PathVariable UUID id) {
-        log.info("Received request to delete user by ID: {}", id);
-        appUserService.deleteUser(id);
-        log.info("User deleted with ID: {}", id);
-        return ResponseEntity.noContent().build();
+    public Mono<ResponseEntity<Void>> deleteUser(@Parameter(description = "ID of the user to be deleted") @PathVariable UUID id) {
+        log.info("Received reactive request to delete user by ID: {}", id);
+        return appUserService.deleteUser(id)
+            .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+            .doOnSuccess(response -> log.info("User deleted with ID: {}", id))
+            .doOnError(e -> log.error("Error deleting user ID: {}", id, e));
     }
 }

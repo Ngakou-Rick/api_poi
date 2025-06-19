@@ -1,6 +1,5 @@
 package com.yowyob.yowyob_point_of_interest_api.model.utils;
 
-import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Embeddable
 public class AddressType {
     private String streetNumber;
     private String streetName;

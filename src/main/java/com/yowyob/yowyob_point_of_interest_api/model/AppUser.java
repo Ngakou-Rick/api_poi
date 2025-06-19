@@ -1,67 +1,49 @@
 package com.yowyob.yowyob_point_of_interest_api.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.util.Set;
-
+// Removed Set imports
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "app_user")
+@Table("app_user") // Spring Data R2DBC
 public class AppUser {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "user_id", updatable = false, nullable = false)
-    private UUID userId;
+    @Id // Spring Data
+    @Column("user_id")
+    private UUID userId; // Ensure this is set before save
 
-    @ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private Organization organization;
+    @Column("org_id")
+    private UUID orgId; // Foreign key
 
-    @Column(name = "username", nullable = false)
+    @Column("username")
     private String username;
 
-    @Column(name = "email")
+    @Column("email")
     private String email;
 
-    @Column(name = "phone")
+    @Column("phone")
     private String phone;
 
-    @Column(name = "password_hash")
+    @Column("password_hash")
     private String passwordHash;
 
-    @Column(name = "role", nullable = false)
-    private String role; // e.g. 'USER', 'ADMIN', 'SUPER_ADMIN'
+    @Column("role")
+    private String role;
 
-    @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
-    @Builder.Default
-    private boolean isActive = true;
+    @Column("is_active")
+    private Boolean isActive; // Logic to default this will be in service
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
-    @Builder.Default
-    private OffsetDateTime createdAt = OffsetDateTime.now();
-
-    @OneToMany(mappedBy = "createdBy")
-    private Set<PointOfInterest> createdPois;
-
-    @OneToMany(mappedBy = "deactivatedBy")
-    private Set<PointOfInterest> deactivatedPois;
-
-    @OneToMany(mappedBy = "updatedBy")
-    private Set<PointOfInterest> updatedPois;
-
-
-    @OneToMany(mappedBy = "user")
-    private Set<PoiReview> poiReviews;
-
+    @Column("created_at")
+    private OffsetDateTime createdAt; // Logic to set this will be in service
 }

@@ -19,6 +19,6 @@ public class AppUserDTO {
     private String phone;
     // Password hash should not be in DTOs exposed to client
     private String role;
-    private boolean isActive;
+    private Boolean isActive;
     private OffsetDateTime createdAt;
 }

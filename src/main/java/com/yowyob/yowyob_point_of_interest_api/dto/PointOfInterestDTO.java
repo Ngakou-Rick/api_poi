@@ -27,7 +27,9 @@ public class PointOfInterestDTO {
     private String poiDescription;
     // byte[] poiLogo; // Logo might be handled by a separate endpoint or as Base64 String
     private List<String> poiImages;
-    private String locationGeog; // String for now, consistent with entity
+    private Double latitude;
+    private Double longitude;
+    private String locationGeogWKT; // For outputting WKT if needed
     private AddressTypeDTO poiAddress;
     private String phoneNumber;
     private String websiteUrl;
@@ -37,7 +39,7 @@ public class PointOfInterestDTO {
     private String operationTimePlan; // JSON string
     private List<ContactPersonTypeDTO> poiContacts;
     private Float popularityScore;
-    private boolean isActive;
+    private Boolean isActive;
     private String deactivationReason;
     private UUID deactivatedByUserId;
     private OffsetDateTime createdAt;

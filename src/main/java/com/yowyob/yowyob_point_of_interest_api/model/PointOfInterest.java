@@ -1,149 +1,130 @@
 package com.yowyob.yowyob_point_of_interest_api.model;
 
-import com.yowyob.yowyob_point_of_interest_api.model.utils.AddressType;
-import com.yowyob.yowyob_point_of_interest_api.model.utils.ContactPersonType;
-import jakarta.persistence.*;
+// Remove com.yowyob.yowyob_point_of_interest_api.model.utils.AddressType;
+// Remove com.yowyob.yowyob_point_of_interest_api.model.utils.ContactPersonType;
+// Remove org.locationtech.jts.geom.Point;
+// Remove org.hibernate.annotations.JdbcTypeCode;
+// Remove org.hibernate.type.SqlTypes;
+// Remove org.hibernate.annotations.UpdateTimestamp;
+// Remove jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-import org.locationtech.jts.geom.Point;
-
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.Set;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "point_of_interest")
+@Table("point_of_interest")
 public class PointOfInterest {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "poi_id", updatable = false, nullable = false)
-    private UUID poiId;
+    @Column("poi_id")
+    private UUID poiId; // Must be set before save
 
-    @ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private Organization organization;
+    @Column("org_id")
+    private UUID orgId;
 
-    // Assuming town_id might be nullable or handled elsewhere if it's a strict FK
-    @Column(name = "town_id")
+    @Column("town_id")
     private UUID townId;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by_user_id", nullable = false)
-    private AppUser createdBy;
+    @Column("created_by_user_id")
+    private UUID createdByUserId;
 
-    @Column(name = "poi_name", nullable = false)
+    @Column("poi_name")
     private String poiName;
 
-    @Column(name = "poi_type", nullable = false)
-    private String poiType; // Ex: 'RESTAURANT', 'HOTEL'
+    @Column("poi_type")
+    private String poiType;
 
-    @Column(name = "poi_category", nullable = false)
-    private String poiCategory; // Ex: 'Food & Drink', 'Transport'
+    @Column("poi_category")
+    private String poiCategory;
 
-    @Column(name = "poi_long_name")
+    @Column("poi_long_name")
     private String poiLongName;
 
-    @Column(name = "poi_short_name")
+    @Column("poi_short_name")
     private String poiShortName;
 
-    @Column(name = "poi_friendly_name")
+    @Column("poi_friendly_name")
     private String poiFriendlyName;
 
-    @Lob
-    @Column(name = "poi_description")
+    @Column("poi_description") // TEXT in DB, LOB was for JPA with potential for CLOB
     private String poiDescription;
 
-    @Lob
-    @Column(name = "poi_logo")
-    private byte[] poiLogo; // For small images/logo
+    @Column("poi_logo") // BYTEA
+    private byte[] poiLogo;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "poi_images", columnDefinition = "text[]")
-    private List<String> poiImages; // Tableau d'URLs
+    @Column("poi_images") // TEXT[]
+    private List<String> poiImages;
 
-    @Column(name = "location_geog", nullable = false, columnDefinition = "geography(Point,4326)")
-    private org.locationtech.jts.geom.Point locationGeog;
+    @Column("location_geog") // Storing as WKT string, actual column type is geometry(Point,4326)
+    private String locationGeogWkt;
 
-    @Embedded
-    private AddressType poiAddress; // Adresse structurée
+    // Flattened AddressType fields
+    @Column("street_number")
+    private String poiAddressStreetNumber;
+    @Column("street_name")
+    private String poiAddressStreetName;
+    @Column("city")
+    private String poiAddressCity;
+    @Column("state_province")
+    private String poiAddressStateProvince;
+    @Column("postal_code")
+    private String poiAddressPostalCode;
+    @Column("country")
+    private String poiAddressCountry;
+    @Column("informal_address")
+    private String poiAddressInformalAddress;
 
-    @Column(name = "phone_number")
+    @Column("phone_number")
     private String phoneNumber;
 
-    @Column(name = "website_url")
+    @Column("website_url")
     private String websiteUrl;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "poi_amenities", columnDefinition = "text[]")
-    private List<String> poiAmenities; // Ex: ['Wi-Fi', 'Parking', "Jardin"]
+    @Column("poi_amenities") // TEXT[]
+    private List<String> poiAmenities;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "poi_keywords", columnDefinition = "text[]")
-    private List<String> poiKeywords; // Ex: ["BUS STOP", "HOPITAL", "CENTRE VILLE"]
+    @Column("poi_keywords") // TEXT[]
+    private List<String> poiKeywords;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "poi_type_tags", columnDefinition = "text[]")
-    private List<String> poiTypeTags; // Tags complémentaires
+    @Column("poi_type_tags") // TEXT[]
+    private List<String> poiTypeTags;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "operation_time_plan", columnDefinition = "jsonb")
-    private String operationTimePlan; // Using String for JSONB for now
+    @Column("operation_time_plan") // JSONB, map to String
+    private String operationTimePlan;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "poi_contacts_collection", joinColumns = @JoinColumn(name = "poi_id")) // Intermediate table for the collection
-    @AttributeOverrides({
-            @AttributeOverride(name = "name", column = @Column(name = "contact_name")),
-            @AttributeOverride(name = "role", column = @Column(name = "contact_role")),
-            @AttributeOverride(name = "phone", column = @Column(name = "contact_phone")),
-            @AttributeOverride(name = "email", column = @Column(name = "contact_email"))
-    })
-    private List<ContactPersonType> poiContacts;
+    @Column("poi_contacts") // contact_person_type[], map to JSON String
+    private String poiContactsJson;
 
+    @Column("popularity_score")
+    private Float popularityScore;
 
-    @Column(name = "popularity_score", columnDefinition = "FLOAT DEFAULT 0")
-    @Builder.Default
-    private Float popularityScore = 0.0f;
+    @Column("is_active")
+    private Boolean isActive;
 
-    @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
-    @Builder.Default
-    private boolean isActive = true;
-
-    @Column(name = "deactivation_reason")
+    @Column("deactivation_reason")
     private String deactivationReason;
 
-    @ManyToOne
-    @JoinColumn(name = "deactivated_by_user_id")
-    private AppUser deactivatedBy;
+    @Column("deactivated_by_user_id")
+    private UUID deactivatedByUserId;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
-    @Builder.Default
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    @Column("created_at")
+    private OffsetDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "updated_by_user_id")
-    private AppUser updatedBy;
+    @Column("updated_by_user_id")
+    private UUID updatedByUserId;
 
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
-    @Builder.Default
-    private OffsetDateTime updatedAt = OffsetDateTime.now();
-
-    @OneToMany(mappedBy = "pointOfInterest")
-    private Set<PoiReview> poiReviews;
-
-    @OneToMany(mappedBy = "pointOfInterest")
-    private Set<PoiAccessLog> poiAccessLogs;
-
-    @OneToMany(mappedBy = "pointOfInterest")
-    private Set<PoiPlatformStat> poiPlatformStats;
+    @Column("updated_at")
+    private OffsetDateTime updatedAt;
 }

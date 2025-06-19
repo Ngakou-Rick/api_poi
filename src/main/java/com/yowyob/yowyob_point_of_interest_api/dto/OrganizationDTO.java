@@ -17,7 +17,7 @@ public class OrganizationDTO {
     private String orgCode;
     private String orgType;
     private OffsetDateTime createdAt;
-    private boolean isActive;
+    private Boolean isActive;
     // Note: Collections of related entities (users, pois, etc.) are typically not included in basic DTOs
     // to avoid overly large payloads and circular dependencies. They can be fetched via separate endpoints.
 }

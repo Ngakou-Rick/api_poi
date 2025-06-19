@@ -8,12 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional; // Keep for conceptual boundary
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.OffsetDateTime; // Added
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class OrganizationService {
@@ -29,52 +29,61 @@ public class OrganizationService {
     }
 
     @Transactional
-    public OrganizationDTO saveOrganization(OrganizationDTO organizationDTO) {
+    public Mono<OrganizationDTO> saveOrganization(OrganizationDTO organizationDTO) {
         log.info("Saving organization: {}", organizationDTO.getOrgName());
         Organization organization = organizationMapper.toEntity(organizationDTO);
-        // If ID is null, it's a create operation. If ID is present, it's an update.
-        // For updates, ensure to handle existing entities correctly if needed (e.g. merging)
-        Organization savedOrg = organizationRepository.save(organization);
-        log.info("Saved organization with ID: {}", savedOrg.getOrganizationId());
-        return organizationMapper.toDTO(savedOrg);
+
+        if (organization.getOrganizationId() == null) { // New organization
+            organization.setOrganizationId(UUID.randomUUID()); // Assign ID if not DB generated
+            organization.setCreatedAt(OffsetDateTime.now());
+            if (organization.getIsActive() == null) {
+                organization.setIsActive(true);
+            }
+        }
+        // For updates, createdAt should not change. isActive is mapped from DTO.
+
+        return organizationRepository.save(organization)
+            .map(organizationMapper::toDTO)
+            .doOnSuccess(dto -> log.info("Saved organization with ID: {}", dto.getOrganizationId()))
+            .doOnError(e -> log.error("Error saving organization: {}", organizationDTO.getOrgName(), e));
     }
 
-    public Optional<OrganizationDTO> getOrganizationById(UUID id) {
+    public Mono<OrganizationDTO> getOrganizationById(UUID id) {
         log.info("Fetching organization by ID: {}", id);
         return organizationRepository.findById(id)
                                      .map(organizationMapper::toDTO);
     }
 
-    public List<OrganizationDTO> getAllOrganizations() {
+    public Flux<OrganizationDTO> getAllOrganizations() {
         log.info("Fetching all organizations");
         return organizationRepository.findAll()
-                                     .stream()
-                                     .map(organizationMapper::toDTO)
-                                     .collect(Collectors.toList());
+                                     .map(organizationMapper::toDTO);
     }
 
     @Transactional
-    public OrganizationDTO updateOrganization(UUID id, OrganizationDTO organizationDTO) {
+    public Mono<OrganizationDTO> updateOrganization(UUID id, OrganizationDTO organizationDTO) {
         log.info("Updating organization with ID: {}", id);
-        Organization existingOrg = organizationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Organization not found with id " + id)); // TODO: Custom exception
-
-        // Update fields from DTO
-        existingOrg.setOrgName(organizationDTO.getOrgName());
-        existingOrg.setOrgCode(organizationDTO.getOrgCode());
-        existingOrg.setOrgType(organizationDTO.getOrgType());
-        existingOrg.setActive(organizationDTO.isActive());
-        // createdAt is typically not updated
-
-        Organization updatedOrg = organizationRepository.save(existingOrg);
-        log.info("Updated organization with ID: {}", updatedOrg.getOrganizationId());
-        return organizationMapper.toDTO(updatedOrg);
+        return organizationRepository.findById(id)
+            .flatMap(existingOrg -> {
+                existingOrg.setOrgName(organizationDTO.getOrgName());
+                existingOrg.setOrgCode(organizationDTO.getOrgCode());
+                existingOrg.setOrgType(organizationDTO.getOrgType());
+                if (organizationDTO.getIsActive() != null) { // Allow explicit update of isActive
+                    existingOrg.setIsActive(organizationDTO.getIsActive());
+                }
+                // createdAt is not updated
+                return organizationRepository.save(existingOrg);
+            })
+            .map(organizationMapper::toDTO)
+            .doOnSuccess(dto -> log.info("Updated organization with ID: {}", dto.getOrganizationId()))
+            .doOnError(e -> log.error("Error updating organization ID: {}", id, e));
     }
 
     @Transactional
-    public void deleteOrganization(UUID id) {
+    public Mono<Void> deleteOrganization(UUID id) {
         log.info("Deleting organization by ID: {}", id);
-        organizationRepository.deleteById(id);
-        log.info("Deleted organization with ID: {}", id);
+        return organizationRepository.deleteById(id)
+            .doOnSuccess(v -> log.info("Deleted organization with ID: {}", id))
+            .doOnError(e -> log.error("Error deleting organization ID: {}", id, e));
     }
 }

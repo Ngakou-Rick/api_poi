@@ -1,10 +1,13 @@
 package com.yowyob.yowyob_point_of_interest_api.model;
 
-import jakarta.persistence.*;
+// Remove jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -13,46 +16,37 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "poi_review")
+@Table("poi_review")
 public class PoiReview {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "review_id", updatable = false, nullable = false)
+    @Column("review_id")
     private UUID reviewId;
 
-    @ManyToOne
-    @JoinColumn(name = "poi_id", nullable = false)
-    private PointOfInterest pointOfInterest;
+    @Column("poi_id")
+    private UUID poiId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private AppUser user;
+    @Column("user_id")
+    private UUID userId;
 
-    @ManyToOne
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+    @Column("organization_id")
+    private UUID organizationId;
 
-    @Column(name = "platform_type", nullable = false)
-    private String platformType; // Plateforme source du review
+    @Column("platform_type")
+    private String platformType;
 
-    @Column(name = "rating") // CHECK constraint (rating >= 1 AND rating <= 5) handled by DB
+    @Column("rating")
     private Integer rating;
 
-    @Lob
-    @Column(name = "review_text")
+    @Column("review_text") // TEXT in DB
     private String reviewText;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
-    @Builder.Default
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    @Column("created_at")
+    private OffsetDateTime createdAt;
 
-    @Column(name = "likes", columnDefinition = "INT DEFAULT 0")
-    @Builder.Default
-    private Integer likes = 0;
+    @Column("likes")
+    private Integer likes;
 
-    @Column(name = "dislikes", columnDefinition = "INT DEFAULT 0")
-    @Builder.Default
-    private Integer dislikes = 0;
+    @Column("dislikes")
+    private Integer dislikes;
 }

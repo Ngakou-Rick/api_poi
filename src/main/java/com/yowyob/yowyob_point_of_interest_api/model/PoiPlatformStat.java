@@ -1,10 +1,13 @@
 package com.yowyob.yowyob_point_of_interest_api.model;
 
-import jakarta.persistence.*;
+// Remove jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -13,42 +16,34 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "poi_platform_stat")
+@Table("poi_platform_stat")
 public class PoiPlatformStat {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "stat_id", updatable = false, nullable = false)
+    @Column("stat_id")
     private UUID statId;
 
-    @ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private Organization organization;
+    @Column("org_id")
+    private UUID orgId;
 
-    @ManyToOne
-    @JoinColumn(name = "poi_id") // Nullable as per SQL (can be overall org stats)
-    private PointOfInterest pointOfInterest;
+    @Column("poi_id")
+    private UUID poiId;
 
-    @Column(name = "platform_type", nullable = false)
-    private String platformType; // e.g. 'IOS', 'ANDROID', 'LINUX', etc.
+    @Column("platform_type")
+    private String platformType;
 
-    @Column(name = "stat_date", nullable = false)
+    @Column("stat_date")
     private LocalDate statDate;
 
-    @Column(name = "views", columnDefinition = "INT DEFAULT 0")
-    @Builder.Default
-    private Integer views = 0;
+    @Column("views")
+    private Integer views;
 
-    @Column(name = "reviews", columnDefinition = "INT DEFAULT 0")
-    @Builder.Default
-    private Integer reviews = 0;
+    @Column("reviews")
+    private Integer reviews;
 
-    @Column(name = "likes", columnDefinition = "INT DEFAULT 0")
-    @Builder.Default
-    private Integer likes = 0;
+    @Column("likes")
+    private Integer likes;
 
-    @Column(name = "dislikes", columnDefinition = "INT DEFAULT 0")
-    @Builder.Default
-    private Integer dislikes = 0;
+    @Column("dislikes")
+    private Integer dislikes;
 }

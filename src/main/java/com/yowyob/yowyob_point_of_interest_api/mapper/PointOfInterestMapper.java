@@ -8,6 +8,11 @@ import org.mapstruct.Named;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import java.util.List;
+import java.io.IOException; // Added
+import java.util.Collections; // Added
+import com.fasterxml.jackson.core.type.TypeReference; // Added
+import com.fasterxml.jackson.databind.ObjectMapper; // Added
+import com.yowyob.yowyob_point_of_interest_api.dto.ContactPersonTypeDTO; // Added
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
@@ -25,7 +30,10 @@ public interface PointOfInterestMapper {
     @Mapping(source = "createdBy.userId", target = "createdByUserId")
     @Mapping(source = "deactivatedBy.userId", target = "deactivatedByUserId")
     @Mapping(source = "updatedBy.userId", target = "updatedByUserId")
-    @Mapping(source = "locationGeog", target = "locationGeog", qualifiedByName = "pointToWkt")
+    @Mapping(source = "locationGeog", target = "locationGeogWKT", qualifiedByName = "pointToWkt")
+    @Mapping(expression = "java(pointOfInterest.getLocationGeog() != null ? pointOfInterest.getLocationGeog().getY() : null)", target = "latitude")
+    @Mapping(expression = "java(pointOfInterest.getLocationGeog() != null ? pointOfInterest.getLocationGeog().getX() : null)", target = "longitude")
+    @Mapping(source = "poiContactsJson", target = "poiContacts", qualifiedByName = "mapPoiContactsJsonToDto")
     PointOfInterestDTO toDTO(PointOfInterest pointOfInterest);
 
     @Mapping(target = "organization", ignore = true)
@@ -35,7 +43,8 @@ public interface PointOfInterestMapper {
     @Mapping(target = "poiReviews", ignore = true)
     @Mapping(target = "poiAccessLogs", ignore = true)
     @Mapping(target = "poiPlatformStats", ignore = true)
-    @Mapping(source = "locationGeog", target = "locationGeog", qualifiedByName = "wktToPoint")
+    @Mapping(target = "locationGeog", ignore = true) // Service will handle this from DTO's lat/lon
+    @Mapping(target = "poiContactsJson", ignore = true) // Service will handle this from DTO's List<ContactPersonTypeDTO>
     PointOfInterest toEntity(PointOfInterestDTO pointOfInterestDTO);
 
     List<PointOfInterestDTO> toDTOList(List<PointOfInterest> pointOfInterests);
@@ -62,6 +71,20 @@ public interface PointOfInterestMapper {
             // Consider logging this error or throwing a custom mapping exception
             log.error("Error parsing WKT string to Point: {}", wkt, e);
             return null;
+        }
+    }
+
+    @Named("mapPoiContactsJsonToDto")
+    default List<ContactPersonTypeDTO> mapPoiContactsJsonToDto(String json) {
+        if (json == null || json.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper(); // Simple instantiation for default method
+            return objectMapper.readValue(json, new TypeReference<List<ContactPersonTypeDTO>>() {});
+        } catch (IOException e) {
+            log.error("Error deserializing poiContactsJson to DTO list: {}", json, e);
+            return Collections.emptyList();
         }
     }
 }

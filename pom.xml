@@ -30,7 +30,7 @@
 		<java.version>17</java.version>
 		<jts.version>1.19.0</jts.version>
 		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
-		<!-- lombok.version sera géré par spring-boot-starter-parent -->
+		<lombok.version>1.18.30</lombok.version>
 		<!-- spring-restdocs.version sera géré par spring-boot-starter-parent si spring-boot-starter-restdocs est utilisé, sinon définissez-le -->
 	</properties>
 	<dependencies>
@@ -40,11 +40,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter-data-r2dbc</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -59,7 +59,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+			<artifactId>r2dbc-postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -70,11 +70,7 @@
     		<version>${jts.version}</version>
 		</dependency>
 
-		<dependency>
-    		<groupId>org.hibernate.orm</groupId>
-    		<artifactId>hibernate-spatial</artifactId>
-            <!-- La version est gérée par spring-boot-starter-parent -->
-		</dependency>
+		<!-- Removed hibernate-spatial -->
 
 		<dependency>
     		<groupId>org.springframework.boot</groupId>
@@ -106,7 +102,7 @@
 		</dependency>
 		<dependency>
     		<groupId>org.springdoc</groupId>
-   		 	<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
     		<version>2.5.0</version> <!-- Vérifiez la dernière version compatible -->
 		</dependency>
 
@@ -115,11 +111,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.restdocs</groupId>
-			<artifactId>spring-restdocs-mockmvc</artifactId>
-			<scope>test</scope>
-		</dependency>
+		<!-- Removed spring-restdocs-mockmvc -->
 	</dependencies>
 
 	<build>
@@ -152,6 +144,7 @@
 					<!-- Activer le componentModel spring pour MapStruct -->
 					<compilerArgs>
 						<arg>-Amapstruct.defaultComponentModel=spring</arg>
+						<arg>-Amapstruct.verbose=true</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>
