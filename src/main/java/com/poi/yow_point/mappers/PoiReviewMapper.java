@@ -1,24 +1,19 @@
 package com.poi.yow_point.mappers;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+//import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import com.poi.yow_point.dto.PoiReviewDTO;
 import com.poi.yow_point.models.PoiReview;
 
-@Mapper(componentModel = "spring", uses = {PointOfInterestMapper.class, AppUserMapper.class, OrganizationMapper.class})
+@Mapper(componentModel = "spring")
 public interface PoiReviewMapper {
     PoiReviewMapper INSTANCE = Mappers.getMapper(PoiReviewMapper.class);
 
-    @Mapping(source = "pointOfInterest.poiId", target = "poiId")
-    @Mapping(source = "user.userId", target = "userId")
-    @Mapping(source = "organization.organizationId", target = "organizationId")
+    // Mapping direct car l'entité contient maintenant directement les IDs
     PoiReviewDTO toDTO(PoiReview poiReview);
 
-    @Mapping(target = "pointOfInterest", ignore = true)
-    @Mapping(target = "user", ignore = true)
-    @Mapping(target = "organization", ignore = true)
+    // Mapping direct également
     PoiReview toEntity(PoiReviewDTO poiReviewDTO);
 }
-

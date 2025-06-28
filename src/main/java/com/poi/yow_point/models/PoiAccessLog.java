@@ -1,12 +1,13 @@
 package com.poi.yow_point.models;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -15,38 +16,39 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "poi_access_log")
+@Table("poi_access_log")
 public class PoiAccessLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "access_id", updatable = false, nullable = false)
+    @Column("access_id")
     private UUID accessId;
 
-    @ManyToOne
-    @JoinColumn(name = "poi_id", nullable = false)
-    private PointOfInterest pointOfInterest;
-    
-    @ManyToOne
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+    @Column("poi_id")
+    private UUID poiId; // Foreign key reference au lieu de @ManyToOne
 
-    @Column(name = "platform_type", nullable = false)
+    @Column("organization_id")
+    private UUID organizationId; // Foreign key reference au lieu de @ManyToOne
+
+    @Column("platform_type")
     private String platformType; // 'Android', 'iOS', 'Linux', 'Web', 'Windows', etc.
 
-    @Column(name = "user_id") // Optional user
-    private UUID userId; 
+    @Column("user_id")
+    private UUID userId; // Optional user
 
-    @Column(name = "access_type")
+    @Column("access_type")
     private String accessType; // 'view', 'click', 'review', etc.
 
-    @Column(name = "access_datetime", columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
+    @CreatedDate
+    @Column("access_datetime")
     @Builder.Default
     private OffsetDateTime accessDatetime = OffsetDateTime.now();
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "metadata", columnDefinition = "jsonb")
-    private String metadata; // Using String for JSONB for now
-}
+    @Column("metadata")
+    private String metadata; // JSONB stocké comme String
 
+    // Méthodes utilitaires pour la gestion des métadonnées JSON
+    public boolean hasMetadata() {
+        return metadata != null && !metadata.trim().isEmpty();
+    }
+
+}

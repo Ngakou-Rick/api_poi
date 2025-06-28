@@ -1,7 +1,8 @@
 package com.poi.yow_point.models;
 
-
-import jakarta.persistence.*;
+import org.springframework.data.annotation.*;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,42 +15,45 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "poi_platform_stat")
+@Table("poi_platform_stat")
 public class PoiPlatformStat {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "stat_id", updatable = false, nullable = false)
+    @Column("stat_id")
     private UUID statId;
 
-    @ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private Organization organization;
+    @Column("org_id")
+    private UUID orgId;
 
-    @ManyToOne
-    @JoinColumn(name = "poi_id") // Nullable as per SQL (can be overall org stats)
-    private PointOfInterest pointOfInterest;
+    @Column("poi_id") // Nullable as per SQL (can be overall org stats)
+    private UUID poiId;
 
-    @Column(name = "platform_type", nullable = false)
+    @Column("platform_type")
     private String platformType; // e.g. 'IOS', 'ANDROID', 'LINUX', etc.
 
-    @Column(name = "stat_date", nullable = false)
+    @Column("stat_date")
     private LocalDate statDate;
 
-    @Column(name = "views", columnDefinition = "INT DEFAULT 0")
+    @Column("views")
     @Builder.Default
     private Integer views = 0;
 
-    @Column(name = "reviews", columnDefinition = "INT DEFAULT 0")
+    @Column("reviews")
     @Builder.Default
     private Integer reviews = 0;
 
-    @Column(name = "likes", columnDefinition = "INT DEFAULT 0")
+    @Column("likes")
     @Builder.Default
     private Integer likes = 0;
 
-    @Column(name = "dislikes", columnDefinition = "INT DEFAULT 0")
+    @Column("dislikes")
     @Builder.Default
     private Integer dislikes = 0;
+
+    // Transient fields pour les objets relationnels (seront chargés séparément)
+    @Transient
+    private Organization organization;
+
+    @Transient
+    private PointOfInterest pointOfInterest;
 }

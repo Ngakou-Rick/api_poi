@@ -1,225 +1,190 @@
 package com.poi.yow_point.controllers;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.poi.yow_point.dto.PointOfInterestDTO;
+import com.poi.yow_point.services.PointOfInterestService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import com.poi.yow_point.dto.PointOfInterestDTO;
-import com.poi.yow_point.services.PointOfInterestService;
-
-import java.util.List;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/pois")
-@Tag(name = "Point of Interest API", description = "APIs for managing Points of Interest (POIs)")
+@RequestMapping("/api/points-of-interest")
+@CrossOrigin(origins = "*")
 public class PointOfInterestController {
 
-    private static final Logger log = LoggerFactory.getLogger(PointOfInterestController.class);
-    private final PointOfInterestService pointOfInterestService;
+    private final PointOfInterestService service;
 
-    @Autowired
-    public PointOfInterestController(PointOfInterestService pointOfInterestService) {
-        this.pointOfInterestService = pointOfInterestService;
+    public PointOfInterestController(PointOfInterestService service) {
+        this.service = service;
     }
 
+    // CRUD de base
     @PostMapping
-    @Operation(summary = "Create a new Point of Interest")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "POI created successfully",
-                         content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid input")
-    })
-    public ResponseEntity<PointOfInterestDTO> createPoi(@RequestBody PointOfInterestDTO poiDTO) {
-        log.info("Received request to create POI: {}", poiDTO.getPoiName());
-        PointOfInterestDTO savedPoi = pointOfInterestService.savePoi(poiDTO);
-        log.info("POI created with ID: {}", savedPoi.getPoiId());
-        return new ResponseEntity<>(savedPoi, HttpStatus.CREATED);
+    public Mono<ResponseEntity<PointOfInterestDTO>> create(@Valid @RequestBody PointOfInterestDTO dto) {
+        return service.create(dto)
+                .map(created -> ResponseEntity.status(HttpStatus.CREATED).body(created))
+                .onErrorReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get a Point of Interest by its ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the POI",
-                         content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class))),
-            @ApiResponse(responseCode = "404", description = "POI not found")
-    })
-    public ResponseEntity<PointOfInterestDTO> getPoiById(@Parameter(description = "ID of the POI to be retrieved") @PathVariable UUID id) {
-        log.info("Received request to get POI by ID: {}", id);
-        return pointOfInterestService.getPoiById(id)
-                .map(poi -> {
-                    log.info("Found POI: {}", poi.getPoiName());
-                    return ResponseEntity.ok(poi);
-                })
-                .orElseGet(() -> {
-                    log.warn("POI not found for ID: {}", id);
-                    return ResponseEntity.notFound().build();
-                });
+    public Mono<ResponseEntity<PointOfInterestDTO>> findById(@PathVariable UUID id) {
+        return service.findById(id)
+                .map(dto -> ResponseEntity.ok(dto))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    @Operation(summary = "Get all Points of Interest, with optional filtering")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of POIs",
-                         content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class)))
-    })
-    public ResponseEntity<List<PointOfInterestDTO>> getAllPois(
-            @Parameter(description = "Filter by POI name (case-insensitive, partial match)") @RequestParam(required = false) String name,
-            @Parameter(description = "Filter by POI type") @RequestParam(required = false) String type,
-            @Parameter(description = "Filter by POI category") @RequestParam(required = false) String category) {
-        log.info("Received request to get all POIs with filters - name: [{}], type: [{}], category: [{}]", name, type, category);
-        List<PointOfInterestDTO> pois;
-        if (name != null) {
-            pois = pointOfInterestService.findPoisByName(name);
-        } else if (type != null) {
-            pois = pointOfInterestService.findPoisByType(type);
-        } else if (category != null) {
-            pois = pointOfInterestService.findPoisByCategory(category);
-        } else {
-            pois = pointOfInterestService.getAllPois();
-        }
-        log.info("Returning {} POIs", pois.size());
-        return ResponseEntity.ok(pois);
+    public Flux<PointOfInterestDTO> findAll() {
+        return service.findAll();
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update an existing Point of Interest")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "POI updated successfully",
-                         content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class))),
-            @ApiResponse(responseCode = "404", description = "POI not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid input")
-    })
-    public ResponseEntity<PointOfInterestDTO> updatePoi(
-            @Parameter(description = "ID of the POI to be updated") @PathVariable UUID id, 
-            @RequestBody PointOfInterestDTO poiDetailsDTO) {
-        log.info("Received request to update POI with ID: {}", id);
-        try {
-            PointOfInterestDTO updatedPoi = pointOfInterestService.updatePoi(id, poiDetailsDTO);
-            log.info("POI updated with ID: {}", updatedPoi.getPoiId());
-            return ResponseEntity.ok(updatedPoi);
-        } catch (RuntimeException e) { 
-            log.warn("Failed to update POI with ID: {}. Reason: {}", id, e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+    public Mono<ResponseEntity<PointOfInterestDTO>> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody PointOfInterestDTO dto) {
+        return service.update(id, dto)
+                .map(updated -> ResponseEntity.ok(updated))
+                .onErrorReturn(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a Point of Interest by its ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "POI deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "POI not found")
-    })
-    public ResponseEntity<Void> deletePoi(@Parameter(description = "ID of the POI to be deleted") @PathVariable UUID id) {
-        log.info("Received request to delete POI by ID: {}", id);
-        pointOfInterestService.deletePoi(id);
-        log.info("POI deleted with ID: {}", id);
-        return ResponseEntity.noContent().build();
-    }
-    
-    @GetMapping("/nearby")
-    @Operation(summary = "Find Points of Interest within a certain distance from a location")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of nearby POIs",
-                         content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid input for location or distance")
-    })
-    public ResponseEntity<List<PointOfInterestDTO>> findNearbyPois(
-            @Parameter(description = "Longitude of the center point for search", required = true) @RequestParam double longitude,
-            @Parameter(description = "Latitude of the center point for search", required = true) @RequestParam double latitude,
-            @Parameter(description = "Search radius in meters", required = true) @RequestParam double distance) {
-        log.info("Received request to find nearby POIs. Longitude: {}, Latitude: {}, Distance: {}", longitude, latitude, distance);
-        try {
-            List<PointOfInterestDTO> pois = pointOfInterestService.findPoisNearby(longitude, latitude, distance);
-            log.info("Found {} POIs nearby.", pois.size());
-            return ResponseEntity.ok(pois);
-        } catch (Exception e) {
-            log.error("Error finding nearby POIs: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); 
-        }
+    public Mono<ResponseEntity<Void>> deleteById(@PathVariable UUID id) {
+        return service.deleteById(id)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorReturn(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/town/{townId}")
-    @Operation(summary = "Get Points of Interest by Town ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved POIs for the town",
-                         content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class))),
-            @ApiResponse(responseCode = "404", description = "No POIs found for this town ID or invalid ID") 
-    })
-    public ResponseEntity<List<PointOfInterestDTO>> getPoisByTownId(
-            @Parameter(description = "UUID of the town", required = true) @PathVariable UUID townId) {
-        log.info("Received request to get POIs by town ID: {}", townId);
-        List<PointOfInterestDTO> pois = pointOfInterestService.findPoisByTownId(townId);
-        if (pois.isEmpty()) {
-            log.info("No POIs found for town ID: {}", townId);
-            return ResponseEntity.notFound().build();
-        }
-        log.info("Returning {} POIs for town ID: {}", pois.size(), townId);
-        return ResponseEntity.ok(pois);
+    @GetMapping("/{id}/exists")
+    public Mono<ResponseEntity<Boolean>> existsById(@PathVariable UUID id) {
+        return service.existsById(id)
+                .map(exists -> ResponseEntity.ok(exists));
     }
 
-    @GetMapping("/state/{stateProvince}")
-    @Operation(summary = "Get Points of Interest by State/Province")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved POIs for the state/province",
-                         content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class))),
-    })
-    public ResponseEntity<List<PointOfInterestDTO>> getPoisByStateProvince(
-            @Parameter(description = "Name of the state or province (case-insensitive)", required = true) @PathVariable String stateProvince) {
-        log.info("Received request to get POIs by state/province: {}", stateProvince);
-        List<PointOfInterestDTO> pois = pointOfInterestService.findPoisByStateProvince(stateProvince);
-        log.info("Returning {} POIs for state/province: {}", pois.size(), stateProvince);
-        return ResponseEntity.ok(pois);
+    // Recherches par critères
+    @GetMapping("/organization/{organizationId}")
+    public Flux<PointOfInterestDTO> findByOrganizationId(@PathVariable UUID organizationId) {
+        return service.findByOrganizationId(organizationId);
     }
 
-    @GetMapping("/user/{userId}")
-    @Operation(summary = "Get Points of Interest created by a specific user")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved POIs for the user",
-                         content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class))),
-            @ApiResponse(responseCode = "404", description = "No POIs found for this user ID or invalid ID")
-    })
-    public ResponseEntity<List<PointOfInterestDTO>> getPoisByCreatorUserId(
-            @Parameter(description = "UUID of the user who created the POIs", required = true) @PathVariable UUID userId) {
-        log.info("Received request to get POIs by creator user ID: {}", userId);
-        List<PointOfInterestDTO> pois = pointOfInterestService.findPoisByCreatorUserId(userId);
-         if (pois.isEmpty()) {
-            log.info("No POIs found for creator user ID: {}", userId);
-            return ResponseEntity.notFound().build(); 
-        }
-        log.info("Returning {} POIs for creator user ID: {}", pois.size(), userId);
-        return ResponseEntity.ok(pois);
+    @GetMapping("/organization/{organizationId}/active")
+    public Flux<PointOfInterestDTO> findActiveByOrganizationId(@PathVariable UUID organizationId) {
+        return service.findActiveByOrganizationId(organizationId);
     }
 
+    @GetMapping("/type/{poiType}")
+    public Flux<PointOfInterestDTO> findByType(@PathVariable String poiType) {
+        return service.findByType(poiType);
+    }
+
+    @GetMapping("/category/{poiCategory}")
+    public Flux<PointOfInterestDTO> findByCategory(@PathVariable String poiCategory) {
+        return service.findByCategory(poiCategory);
+    }
+
+    @GetMapping("/city/{city}")
+    public Flux<PointOfInterestDTO> findByCity(@PathVariable String city) {
+        return service.findByCity(city);
+    }
+
+    @GetMapping("/search")
+    public Flux<PointOfInterestDTO> searchByName(@RequestParam String name) {
+        return service.searchByName(name);
+    }
+
+    // Recherche géographique
+    @GetMapping("/location/nearby")
+    public Flux<PointOfInterestDTO> findNearby(
+            @RequestParam BigDecimal latitude,
+            @RequestParam BigDecimal longitude,
+            @RequestParam(defaultValue = "10.0") Double radiusKm) {
+        return service.findByLocationWithinRadius(latitude, longitude, radiusKm);
+    }
+
+    // Recherche par popularité
     @GetMapping("/popular")
-    @Operation(summary = "Get all Points of Interest ordered by popularity score (descending)")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved POIs ordered by popularity",
-                 content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class)))
-    public ResponseEntity<List<PointOfInterestDTO>> getPoisByPopularity() {
-        log.info("Received request to get POIs ordered by popularity");
-        List<PointOfInterestDTO> pois = pointOfInterestService.findPoisOrderByPopularityScoreDesc();
-        log.info("Returning {} POIs ordered by popularity", pois.size());
-        return ResponseEntity.ok(pois);
+    public Flux<PointOfInterestDTO> findByMinPopularity(
+            @RequestParam(defaultValue = "0.0") Float minScore) {
+        return service.findByMinPopularity(minScore);
     }
-    
-    @GetMapping("/active/popular")
-    @Operation(summary = "Get active Points of Interest ordered by popularity score (descending)")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved active POIs ordered by popularity",
-                 content = @Content(schema = @Schema(implementation = PointOfInterestDTO.class)))
-    public ResponseEntity<List<PointOfInterestDTO>> getActivePoisByPopularity() {
-        log.info("Received request to get active POIs ordered by popularity");
-        List<PointOfInterestDTO> pois = pointOfInterestService.findActivePoisOrderByPopularityScoreDesc();
-        log.info("Returning {} active POIs ordered by popularity", pois.size());
-        return ResponseEntity.ok(pois);
+
+    @GetMapping("/top-popular")
+    public Flux<PointOfInterestDTO> findTopPopular(
+            @RequestParam(defaultValue = "10") Integer limit) {
+        return service.findTopPopular(limit);
+    }
+
+    // Recherche par mots-clés
+    @GetMapping("/keyword")
+    public Flux<PointOfInterestDTO> findByKeyword(@RequestParam String keyword) {
+        return service.findByKeyword(keyword);
+    }
+
+    // Recherche avancée
+    @GetMapping("/advanced")
+    public Flux<PointOfInterestDTO> findByOrganizationAndTypeAndStatus(
+            @RequestParam UUID organizationId,
+            @RequestParam String poiType,
+            @RequestParam(defaultValue = "true") Boolean isActive) {
+        return service.findByOrganizationAndTypeAndStatus(organizationId, poiType, isActive);
+    }
+
+    // Statistiques
+    @GetMapping("/organization/{organizationId}/count")
+    public Mono<ResponseEntity<Long>> countByOrganizationId(@PathVariable UUID organizationId) {
+        return service.countByOrganizationId(organizationId)
+                .map(count -> ResponseEntity.ok(count));
+    }
+
+    @GetMapping("/count/active")
+    public Mono<ResponseEntity<Long>> countActive() {
+        return service.countActive()
+                .map(count -> ResponseEntity.ok(count));
+    }
+
+    @GetMapping("/count/inactive")
+    public Mono<ResponseEntity<Long>> countInactive() {
+        return service.countInactive()
+                .map(count -> ResponseEntity.ok(count));
+    }
+
+    // Actions sur les POI
+    @PatchMapping("/{id}/activate")
+    public Mono<ResponseEntity<PointOfInterestDTO>> activate(@PathVariable UUID id) {
+        return service.activate(id)
+                .map(dto -> ResponseEntity.ok(dto))
+                .onErrorReturn(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    public Mono<ResponseEntity<PointOfInterestDTO>> deactivate(@PathVariable UUID id) {
+        return service.deactivate(id)
+                .map(dto -> ResponseEntity.ok(dto))
+                .onErrorReturn(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}/popularity")
+    public Mono<ResponseEntity<PointOfInterestDTO>> updatePopularityScore(
+            @PathVariable UUID id,
+            @RequestParam Float newScore) {
+        return service.updatePopularityScore(id, newScore)
+                .map(dto -> ResponseEntity.ok(dto))
+                .onErrorReturn(ResponseEntity.notFound().build());
+    }
+
+    // Endpoints de streaming pour de gros volumes
+    @GetMapping(value = "/stream", produces = "application/stream+json")
+    public Flux<PointOfInterestDTO> streamAll() {
+        return service.findAll();
+    }
+
+    @GetMapping(value = "/organization/{organizationId}/stream", produces = "application/stream+json")
+    public Flux<PointOfInterestDTO> streamByOrganization(@PathVariable UUID organizationId) {
+        return service.findByOrganizationId(organizationId);
     }
 }

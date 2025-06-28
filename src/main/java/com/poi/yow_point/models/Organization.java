@@ -1,58 +1,48 @@
 package com.poi.yow_point.models;
 
-
-import jakarta.persistence.*;
+import org.springframework.data.annotation.*;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "organization")
+@Table("organization")
 public class Organization {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "organization_id", updatable = false, nullable = false)
+    @Column("organization_id")
     private UUID organizationId;
 
-    @Column(name = "org_name", nullable = false)
+    @Column("org_name")
     private String orgName;
 
-    @Column(name = "org_code", unique = true)
+    @Column("org_code")
     private String orgCode;
 
-    @Column(name = "org_type")
+    @Column("org_type")
     private String orgType;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
+    @CreatedDate
+    @Column("created_at")
     @Builder.Default
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
-    @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Column("is_active")
     @Builder.Default
     private Boolean isActive = true;
 
-    @OneToMany(mappedBy = "organization")
-    private Set<AppUser> users;
-
-    @OneToMany(mappedBy = "organization")
-    private Set<PointOfInterest> pois;
-
-    @OneToMany(mappedBy = "organization")
-    private Set<PoiReview> poiReviews;
-
-    @OneToMany(mappedBy = "organization")
-    private Set<PoiAccessLog> poiAccessLogs;
-
-    @OneToMany(mappedBy = "organization")
-    private Set<PoiPlatformStat> poiPlatformStats;
+    // Note: Dans Spring Data R2DBC, les relations OneToMany ne sont pas supportées
+    // de la même manière
+    // que dans JPA. Les relations doivent être gérées manuellement via des requêtes
+    // séparées
+    // ou en utilisant des services dédiés pour charger les entités liées.
 }

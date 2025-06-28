@@ -1,11 +1,12 @@
 package com.poi.yow_point.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -13,6 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PoiAccessLogDTO {
+
     private UUID accessId;
     private UUID poiId;
     private UUID organizationId;
@@ -20,5 +22,6 @@ public class PoiAccessLogDTO {
     private UUID userId;
     private String accessType;
     private OffsetDateTime accessDatetime;
-    private String metadata; // JSON string
+    private Map<String, Object> metadata;
+
 }

@@ -10,30 +10,25 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", uses = {OrganizationMapper.class}, collectionMappingStrategy = CollectionMappingStrategy.SETTER_PREFERRED)
+@Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.SETTER_PREFERRED)
 public interface AppUserMapper {
 
-    @Mapping(source = "organization.organizationId", target = "orgId")
+    // Mapping direct car orgId est maintenant un champ direct dans l'entité
     AppUserDTO toDTO(AppUser appUser);
-    // For toEntity, Organization would need to be fetched or set manually in service if only orgId is in DTO
+
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
-    @Mapping(target = "organization", ignore = true)
-    @Mapping(target = "createdPois", ignore = true)
-    @Mapping(target = "deactivatedPois", ignore = true)
-    @Mapping(target = "updatedPois", ignore = true)
-    @Mapping(target = "poiReviews", ignore = true)
     AppUser toEntity(AppUserDTO appUserDTO);
 
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
-    @Mapping(target = "organization", ignore = true)
-    @Mapping(target = "createdPois", ignore = true)
-    @Mapping(target = "deactivatedPois", ignore = true)
-    @Mapping(target = "updatedPois", ignore = true)
-    @Mapping(target = "poiReviews", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateFromDto(AppUserDTO dto, @MappingTarget AppUser entity);
+
+    // Note: Le mapper est considérablement simplifié car :
+    // 1. orgId est maintenant un champ direct (pas d'objet Organization imbriqué)
+    // 2. Les relations OneToMany ne sont plus gérées dans l'entité
+    // 3. Pas besoin de dépendance sur OrganizationMapper
 }

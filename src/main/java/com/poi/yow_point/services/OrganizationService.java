@@ -10,11 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class OrganizationService {
@@ -30,52 +29,67 @@ public class OrganizationService {
     }
 
     @Transactional
-    public OrganizationDTO saveOrganization(OrganizationDTO organizationDTO) {
-        log.info("Saving organization: {}", organizationDTO.getOrgName());
-        Organization organization = organizationMapper.toEntity(organizationDTO);
-        // If ID is null, it's a create operation. If ID is present, it's an update.
-        // For updates, ensure to handle existing entities correctly if needed (e.g. merging)
-        Organization savedOrg = organizationRepository.save(organization);
-        log.info("Saved organization with ID: {}", savedOrg.getOrganizationId());
-        return organizationMapper.toDTO(savedOrg);
+    public Mono<OrganizationDTO> saveOrganization(OrganizationDTO organizationDTO) {
+        return Mono.fromCallable(() -> {
+            log.info("Saving organization: {}", organizationDTO.getOrgName());
+            return organizationMapper.toEntity(organizationDTO);
+        })
+                .flatMap(organization -> organizationRepository.save(organization))
+                .doOnNext(savedOrg -> log.info("Saved organization with ID: {}", savedOrg.getOrganizationId()))
+                .map(organizationMapper::toDTO)
+                .doOnError(error -> log.error("Error saving organization: {}", error.getMessage()));
     }
 
-    public Optional<OrganizationDTO> getOrganizationById(UUID id) {
+    public Mono<OrganizationDTO> getOrganizationById(UUID id) {
         log.info("Fetching organization by ID: {}", id);
         return organizationRepository.findById(id)
-                                     .map(organizationMapper::toDTO);
+                .doOnNext(org -> log.info("Found organization: {}", org.getOrgName()))
+                .map(organizationMapper::toDTO)
+                .doOnError(error -> log.error("Error fetching organization by ID {}: {}", id, error.getMessage()));
     }
 
-    public List<OrganizationDTO> getAllOrganizations() {
+    public Flux<OrganizationDTO> getAllOrganizations() {
         log.info("Fetching all organizations");
         return organizationRepository.findAll()
-                                     .stream()
-                                     .map(organizationMapper::toDTO)
-                                     .collect(Collectors.toList());
+                .map(organizationMapper::toDTO)
+                .doOnComplete(() -> log.info("Completed fetching all organizations"))
+                .doOnError(error -> log.error("Error fetching all organizations: {}", error.getMessage()));
     }
-    
+
     @Transactional
-    public OrganizationDTO updateOrganization(UUID id, OrganizationDTO organizationDTO) {
+    public Mono<OrganizationDTO> updateOrganization(UUID id, OrganizationDTO organizationDTO) {
         log.info("Updating organization with ID: {}", id);
-        Organization existingOrg = organizationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Organization not found with id " + id)); // TODO: Custom exception
-
-        // Update fields from DTO
-        existingOrg.setOrgName(organizationDTO.getOrgName());
-        existingOrg.setOrgCode(organizationDTO.getOrgCode());
-        existingOrg.setOrgType(organizationDTO.getOrgType());
-        existingOrg.setActive(organizationDTO.getIsActive());
-        // createdAt is typically not updated
-
-        Organization updatedOrg = organizationRepository.save(existingOrg);
-        log.info("Updated organization with ID: {}", updatedOrg.getOrganizationId());
-        return organizationMapper.toDTO(updatedOrg);
+        return organizationRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("Organization not found with id " + id)))
+                .map(existingOrg -> {
+                    // Mise à jour des champs depuis le DTO
+                    existingOrg.setOrgName(organizationDTO.getOrgName());
+                    existingOrg.setOrgCode(organizationDTO.getOrgCode());
+                    existingOrg.setOrgType(organizationDTO.getOrgType());
+                    existingOrg.setIsActive(organizationDTO.getIsActive());
+                    // createdAt n'est généralement pas mis à jour
+                    return existingOrg;
+                })
+                .flatMap(organizationRepository::save)
+                .doOnNext(updatedOrg -> log.info("Updated organization with ID: {}", updatedOrg.getOrganizationId()))
+                .map(organizationMapper::toDTO)
+                .doOnError(error -> log.error("Error updating organization with ID {}: {}", id, error.getMessage()));
     }
 
     @Transactional
-    public void deleteOrganization(UUID id) {
+    public Mono<Void> deleteOrganization(UUID id) {
         log.info("Deleting organization by ID: {}", id);
-        organizationRepository.deleteById(id);
-        log.info("Deleted organization with ID: {}", id);
+        return organizationRepository.deleteById(id)
+                .doOnSuccess(unused -> log.info("Deleted organization with ID: {}", id))
+                .doOnError(error -> log.error("Error deleting organization with ID {}: {}", id, error.getMessage()));
+    }
+
+    // Méthode utilitaire pour rechercher par orgCode
+    public Mono<OrganizationDTO> getOrganizationByOrgCode(String orgCode) {
+        log.info("Fetching organization by orgCode: {}", orgCode);
+        return organizationRepository.findByOrgCode(orgCode)
+                .map(organizationMapper::toDTO)
+                .doOnError(error -> log.error("Error fetching organization by orgCode {}: {}", orgCode,
+                        error.getMessage()));
     }
 }

@@ -14,22 +14,19 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface OrganizationMapper {
 
     OrganizationDTO toDTO(Organization organization);
+
     @Mapping(target = "organizationId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "users", ignore = true)
-    @Mapping(target = "pois", ignore = true)
-    @Mapping(target = "poiReviews", ignore = true)
-    @Mapping(target = "poiAccessLogs", ignore = true)
-    @Mapping(target = "poiPlatformStats", ignore = true)
     Organization toEntity(OrganizationDTO organizationDTO);
 
     @Mapping(target = "organizationId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "users", ignore = true)
-    @Mapping(target = "pois", ignore = true)
-    @Mapping(target = "poiReviews", ignore = true)
-    @Mapping(target = "poiAccessLogs", ignore = true)
-    @Mapping(target = "poiPlatformStats", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateFromDto(OrganizationDTO dto, @MappingTarget Organization entity);
+
+    // Note: Dans un contexte réactif avec R2DBC, les mappings sont simplifiés car
+    // les relations OneToMany ne sont plus gérées directement dans l'entité.
+    // Les relations sont généralement gérées par des services séparés qui
+    // retournent
+    // des Mono<T> ou Flux<T> pour les opérations asynchrones.
 }

@@ -1,7 +1,8 @@
 package com.poi.yow_point.models;
 
-
-import jakarta.persistence.*;
+import org.springframework.data.annotation.*;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,60 +10,50 @@ import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.util.Set;
-
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "app_user")
+@Table("app_user")
 public class AppUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "user_id", updatable = false, nullable = false)
+    @Column("user_id")
     private UUID userId;
 
-    @ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private Organization organization;
+    @Column("organization_id")
+    private UUID orgId; // Référence vers l'organisation (clé étrangère)
 
-    @Column(name = "username", nullable = false)
+    @Column("username")
     private String username;
 
-    @Column(name = "email")
+    @Column("email")
     private String email;
 
-    @Column(name = "phone")
+    @Column("phone")
     private String phone;
 
-    @Column(name = "password_hash")
+    @Column("password_hash")
     private String passwordHash;
 
-    @Column(name = "role", nullable = false)
+    @Column("role")
     private String role; // e.g. 'USER', 'ADMIN', 'SUPER_ADMIN'
 
-    @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Column("is_active")
     @Builder.Default
     private Boolean isActive = true;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
+    @CreatedDate
+    @Column("created_at")
     @Builder.Default
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
-    @OneToMany(mappedBy = "createdBy")
-    private Set<PointOfInterest> createdPois;
-
-    @OneToMany(mappedBy = "deactivatedBy")
-    private Set<PointOfInterest> deactivatedPois;
-
-    @OneToMany(mappedBy = "updatedBy")
-    private Set<PointOfInterest> updatedPois;
-
-
-    @OneToMany(mappedBy = "user")
-    private Set<PoiReview> poiReviews;
-
+    // Note: Dans R2DBC, les relations sont gérées différemment
+    // Les relations OneToMany et ManyToOne ne sont pas supportées nativement
+    // Il faut gérer les relations manuellement via des services séparés
+    // Exemples :
+    // - Pour récupérer l'organisation : OrganizationService.findById(orgId)
+    // - Pour récupérer les POIs créés : PoiService.findByCreatedBy(userId)
+    // - Pour récupérer les reviews : PoiReviewService.findByUserId(userId)
 }

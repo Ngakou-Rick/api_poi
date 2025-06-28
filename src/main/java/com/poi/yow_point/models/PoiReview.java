@@ -1,7 +1,8 @@
 package com.poi.yow_point.models;
 
-
-import jakarta.persistence.*;
+import org.springframework.data.annotation.*;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,46 +15,41 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "poi_review")
+@Table("poi_review")
 public class PoiReview {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "review_id", updatable = false, nullable = false)
+    @Column("review_id")
     private UUID reviewId;
 
-    @ManyToOne
-    @JoinColumn(name = "poi_id", nullable = false)
-    private PointOfInterest pointOfInterest;
+    @Column("poi_id")
+    private UUID poiId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private AppUser user;
-    
-    @ManyToOne
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+    @Column("user_id")
+    private UUID userId;
 
-    @Column(name = "platform_type", nullable = false)
+    @Column("organization_id")
+    private UUID organizationId;
+
+    @Column("platform_type")
     private String platformType; // Plateforme source du review
 
-    @Column(name = "rating") // CHECK constraint (rating >= 1 AND rating <= 5) handled by DB
+    @Column("rating") // CHECK constraint (rating >= 1 AND rating <= 5) handled by DB
     private Integer rating;
 
-    @Lob
-    @Column(name = "review_text")
+    @Column("review_text")
     private String reviewText;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
+    @CreatedDate
+    @Column("created_at")
     @Builder.Default
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
-    @Column(name = "likes", columnDefinition = "INT DEFAULT 0")
+    @Column("likes")
     @Builder.Default
     private Integer likes = 0;
 
-    @Column(name = "dislikes", columnDefinition = "INT DEFAULT 0")
+    @Column("dislikes")
     @Builder.Default
     private Integer dislikes = 0;
 }
