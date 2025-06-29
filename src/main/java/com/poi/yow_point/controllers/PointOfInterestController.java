@@ -2,6 +2,8 @@ package com.poi.yow_point.controllers;
 
 import com.poi.yow_point.dto.PointOfInterestDTO;
 import com.poi.yow_point.services.PointOfInterestService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,182 +11,340 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.Valid;
-import org.springframework.validation.annotation.Validated;
+//import org.springframework.validation.annotation.Validated;
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/points-of-interest")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/v1/pois")
+@RequiredArgsConstructor
+@Slf4j
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class PointOfInterestController {
 
-    private final PointOfInterestService service;
+    private final PointOfInterestService poiService;
 
-    public PointOfInterestController(PointOfInterestService service) {
-        this.service = service;
-    }
-
-    // CRUD de base
+    /**
+     * Crée un nouveau POI
+     */
     @PostMapping
-    public Mono<ResponseEntity<PointOfInterestDTO>> create(@Valid @RequestBody PointOfInterestDTO dto) {
-        return service.create(dto)
-                .map(created -> ResponseEntity.status(HttpStatus.CREATED).body(created))
-                .onErrorReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+    public Mono<ResponseEntity<PointOfInterestDTO>> createPoi(@Valid @RequestBody PointOfInterestDTO dto) {
+        log.info("REST request to create POI: {}", dto.getPoiName());
+
+        return poiService.createPoi(dto)
+                .map(savedDto -> ResponseEntity.status(HttpStatus.CREATED).body(savedDto))
+                .onErrorResume(IllegalArgumentException.class,
+                        ex -> Mono.just(ResponseEntity.badRequest().build()))
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error creating POI", ex);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                        });
     }
 
-    @GetMapping("/{id}")
-    public Mono<ResponseEntity<PointOfInterestDTO>> findById(@PathVariable UUID id) {
-        return service.findById(id)
-                .map(dto -> ResponseEntity.ok(dto))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping
-    public Flux<PointOfInterestDTO> findAll() {
-        return service.findAll();
-    }
-
-    @PutMapping("/{id}")
-    public Mono<ResponseEntity<PointOfInterestDTO>> update(
-            @PathVariable UUID id,
+    /**
+     * Met à jour un POI existant
+     */
+    @PutMapping("/{poiId}")
+    public Mono<ResponseEntity<PointOfInterestDTO>> updatePoi(
+            @PathVariable UUID poiId,
             @Valid @RequestBody PointOfInterestDTO dto) {
-        return service.update(id, dto)
-                .map(updated -> ResponseEntity.ok(updated))
-                .onErrorReturn(ResponseEntity.notFound().build());
+        log.info("REST request to update POI: {}", poiId);
+
+        return poiService.updatePoi(poiId, dto)
+                .map(updatedDto -> ResponseEntity.ok(updatedDto))
+                .onErrorResume(IllegalArgumentException.class,
+                        ex -> Mono.just(ResponseEntity.badRequest().build()))
+                .onErrorResume(RuntimeException.class,
+                        ex -> Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error updating POI: {}", poiId, ex);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                        });
     }
 
-    @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Void>> deleteById(@PathVariable UUID id) {
-        return service.deleteById(id)
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .onErrorReturn(ResponseEntity.notFound().build());
+    /**
+     * Récupère un POI par ID
+     */
+    @GetMapping("/{poiId}")
+    public Mono<ResponseEntity<PointOfInterestDTO>> getPoiById(@PathVariable UUID poiId) {
+        log.debug("REST request to get POI: {}", poiId);
+
+        return poiService.findById(poiId)
+                .map(dto -> ResponseEntity.ok(dto))
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error retrieving POI: {}", poiId, ex);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                        });
     }
 
-    @GetMapping("/{id}/exists")
-    public Mono<ResponseEntity<Boolean>> existsById(@PathVariable UUID id) {
-        return service.existsById(id)
-                .map(exists -> ResponseEntity.ok(exists));
-    }
-
-    // Recherches par critères
+    /**
+     * Récupère tous les POIs actifs d'une organisation
+     */
     @GetMapping("/organization/{organizationId}")
-    public Flux<PointOfInterestDTO> findByOrganizationId(@PathVariable UUID organizationId) {
-        return service.findByOrganizationId(organizationId);
+    public Flux<PointOfInterestDTO> getPoisByOrganization(@PathVariable UUID organizationId) {
+        log.debug("REST request to get POIs for organization: {}", organizationId);
+
+        return poiService.findActiveByOrganizationId(organizationId)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error retrieving POIs for organization: {}", organizationId, ex);
+                            return Flux.empty();
+                        });
     }
 
-    @GetMapping("/organization/{organizationId}/active")
-    public Flux<PointOfInterestDTO> findActiveByOrganizationId(@PathVariable UUID organizationId) {
-        return service.findActiveByOrganizationId(organizationId);
+    /**
+     * Récupère tous les POIs (actifs et inactifs) d'une organisation
+     */
+    @GetMapping("/organization/{organizationId}/all")
+    public Flux<PointOfInterestDTO> getAllPoisByOrganization(@PathVariable UUID organizationId) {
+        log.debug("REST request to get all POIs for organization: {}", organizationId);
+
+        return poiService.findByOrganizationId(organizationId)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error retrieving all POIs for organization: {}", organizationId, ex);
+                            return Flux.empty();
+                        });
     }
 
-    @GetMapping("/type/{poiType}")
-    public Flux<PointOfInterestDTO> findByType(@PathVariable String poiType) {
-        return service.findByType(poiType);
-    }
-
-    @GetMapping("/category/{poiCategory}")
-    public Flux<PointOfInterestDTO> findByCategory(@PathVariable String poiCategory) {
-        return service.findByCategory(poiCategory);
-    }
-
-    @GetMapping("/city/{city}")
-    public Flux<PointOfInterestDTO> findByCity(@PathVariable String city) {
-        return service.findByCity(city);
-    }
-
+    /**
+     * Recherche de POIs avec filtres multiples
+     */
     @GetMapping("/search")
-    public Flux<PointOfInterestDTO> searchByName(@RequestParam String name) {
-        return service.searchByName(name);
+    public Flux<PointOfInterestDTO> searchPois(
+            @RequestParam(required = false) UUID organizationId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String searchTerm) {
+        log.debug("REST request to search POIs with filters");
+
+        return poiService.searchWithFilters(organizationId, type, category, city, searchTerm)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error in POI search", ex);
+                            return Flux.empty();
+                        });
     }
 
-    // Recherche géographique
-    @GetMapping("/location/nearby")
-    public Flux<PointOfInterestDTO> findNearby(
+    /**
+     * Recherche géographique dans un rayon
+     */
+    @GetMapping("/location")
+    public Flux<PointOfInterestDTO> getPoisByLocation(
             @RequestParam BigDecimal latitude,
             @RequestParam BigDecimal longitude,
             @RequestParam(defaultValue = "10.0") Double radiusKm) {
-        return service.findByLocationWithinRadius(latitude, longitude, radiusKm);
+        log.debug("REST request to get POIs by location: {}, {} within {} km",
+                latitude, longitude, radiusKm);
+
+        return poiService.findByLocationWithinRadius(latitude, longitude, radiusKm)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error in location-based POI search", ex);
+                            return Flux.empty();
+                        });
     }
 
-    // Recherche par popularité
+    /**
+     * Récupère les POIs par type
+     */
+    @GetMapping("/type/{type}")
+    public Flux<PointOfInterestDTO> getPoisByType(@PathVariable String type) {
+        log.debug("REST request to get POIs by type: {}", type);
+
+        return poiService.findByType(type)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error retrieving POIs by type: {}", type, ex);
+                            return Flux.empty();
+                        });
+    }
+
+    /**
+     * Récupère les POIs par catégorie
+     */
+    @GetMapping("/category/{category}")
+    public Flux<PointOfInterestDTO> getPoisByCategory(@PathVariable String category) {
+        log.debug("REST request to get POIs by category: {}", category);
+
+        return poiService.findByCategory(category)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error retrieving POIs by category: {}", category, ex);
+                            return Flux.empty();
+                        });
+    }
+
+    /**
+     * Recherche par nom
+     */
+    @GetMapping("/name/{name}")
+    public Flux<PointOfInterestDTO> searchPoisByName(@PathVariable String name) {
+        log.debug("REST request to search POIs by name: {}", name);
+
+        return poiService.searchByName(name)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error searching POIs by name: {}", name, ex);
+                            return Flux.empty();
+                        });
+    }
+
+    /**
+     * Récupère les POIs par ville
+     */
+    @GetMapping("/city/{city}")
+    public Flux<PointOfInterestDTO> getPoisByCity(@PathVariable String city) {
+        log.debug("REST request to get POIs by city: {}", city);
+
+        return poiService.findByCity(city)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error retrieving POIs by city: {}", city, ex);
+                            return Flux.empty();
+                        });
+    }
+
+    /**
+     * Récupère les POIs les plus populaires
+     */
     @GetMapping("/popular")
-    public Flux<PointOfInterestDTO> findByMinPopularity(
-            @RequestParam(defaultValue = "0.0") Float minScore) {
-        return service.findByMinPopularity(minScore);
-    }
-
-    @GetMapping("/top-popular")
-    public Flux<PointOfInterestDTO> findTopPopular(
+    public Flux<PointOfInterestDTO> getTopPopularPois(
             @RequestParam(defaultValue = "10") Integer limit) {
-        return service.findTopPopular(limit);
+        log.debug("REST request to get top {} popular POIs", limit);
+
+        return poiService.findTopPopular(limit)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error retrieving popular POIs", ex);
+                            return Flux.empty();
+                        });
     }
 
-    // Recherche par mots-clés
-    @GetMapping("/keyword")
-    public Flux<PointOfInterestDTO> findByKeyword(@RequestParam String keyword) {
-        return service.findByKeyword(keyword);
+    /**
+     * Récupère les POIs créés par un utilisateur
+     */
+    @GetMapping("/user/{userId}")
+    public Flux<PointOfInterestDTO> getPoisByUser(@PathVariable UUID userId) {
+        log.debug("REST request to get POIs created by user: {}", userId);
+
+        return poiService.findByCreatedByUserId(userId)
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error retrieving POIs for user: {}", userId, ex);
+                            return Flux.empty();
+                        });
     }
 
-    // Recherche avancée
-    @GetMapping("/advanced")
-    public Flux<PointOfInterestDTO> findByOrganizationAndTypeAndStatus(
-            @RequestParam UUID organizationId,
-            @RequestParam String poiType,
-            @RequestParam(defaultValue = "true") Boolean isActive) {
-        return service.findByOrganizationAndTypeAndStatus(organizationId, poiType, isActive);
+    /**
+     * Désactive un POI (soft delete)
+     */
+    @PatchMapping("/{poiId}/deactivate")
+    public Mono<ResponseEntity<Void>> deactivatePoi(@PathVariable UUID poiId) {
+        log.info("REST request to deactivate POI: {}", poiId);
+
+        return poiService.deactivatePoi(poiId)
+                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error deactivating POI: {}", poiId, ex);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                        });
     }
 
-    // Statistiques
+    /**
+     * Réactive un POI
+     */
+    @PatchMapping("/{poiId}/activate")
+    public Mono<ResponseEntity<Void>> activatePoi(@PathVariable UUID poiId) {
+        log.info("REST request to activate POI: {}", poiId);
+
+        return poiService.activatePoi(poiId)
+                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error activating POI: {}", poiId, ex);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                        });
+    }
+
+    /**
+     * Supprime définitivement un POI
+     */
+    @DeleteMapping("/{poiId}")
+    public Mono<ResponseEntity<Void>> deletePoi(@PathVariable UUID poiId) {
+        log.info("REST request to delete POI: {}", poiId);
+
+        return poiService.deletePoi(poiId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(RuntimeException.class,
+                        ex -> Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error deleting POI: {}", poiId, ex);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                        });
+    }
+
+    /**
+     * Met à jour le score de popularité
+     */
+    @PatchMapping("/{poiId}/popularity")
+    public Mono<ResponseEntity<Void>> updatePopularityScore(
+            @PathVariable UUID poiId,
+            @RequestParam Float score) {
+        log.info("REST request to update popularity score for POI: {} to {}", poiId, score);
+
+        if (score < 0 || score > 100) {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+
+        return poiService.updatePopularityScore(poiId, score)
+                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error updating popularity score for POI: {}", poiId, ex);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                        });
+    }
+
+    /**
+     * Compte les POIs actifs d'une organisation
+     */
     @GetMapping("/organization/{organizationId}/count")
-    public Mono<ResponseEntity<Long>> countByOrganizationId(@PathVariable UUID organizationId) {
-        return service.countByOrganizationId(organizationId)
-                .map(count -> ResponseEntity.ok(count));
+    public Mono<ResponseEntity<Long>> countActivePoisByOrganization(@PathVariable UUID organizationId) {
+        log.debug("REST request to count active POIs for organization: {}", organizationId);
+
+        return poiService.countActiveByOrganizationId(organizationId)
+                .map(count -> ResponseEntity.ok(count))
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error counting POIs for organization: {}", organizationId, ex);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                        });
     }
 
-    @GetMapping("/count/active")
-    public Mono<ResponseEntity<Long>> countActive() {
-        return service.countActive()
-                .map(count -> ResponseEntity.ok(count));
-    }
+    /**
+     * Vérifie l'existence d'un POI par nom dans une organisation
+     */
+    @GetMapping("/check-name")
+    public Mono<ResponseEntity<Boolean>> checkPoiNameExists(
+            @RequestParam String name,
+            @RequestParam UUID organizationId,
+            @RequestParam(required = false) UUID excludeId) {
+        log.debug("REST request to check POI name existence: {} in organization: {}", name, organizationId);
 
-    @GetMapping("/count/inactive")
-    public Mono<ResponseEntity<Long>> countInactive() {
-        return service.countInactive()
-                .map(count -> ResponseEntity.ok(count));
-    }
-
-    // Actions sur les POI
-    @PatchMapping("/{id}/activate")
-    public Mono<ResponseEntity<PointOfInterestDTO>> activate(@PathVariable UUID id) {
-        return service.activate(id)
-                .map(dto -> ResponseEntity.ok(dto))
-                .onErrorReturn(ResponseEntity.notFound().build());
-    }
-
-    @PatchMapping("/{id}/deactivate")
-    public Mono<ResponseEntity<PointOfInterestDTO>> deactivate(@PathVariable UUID id) {
-        return service.deactivate(id)
-                .map(dto -> ResponseEntity.ok(dto))
-                .onErrorReturn(ResponseEntity.notFound().build());
-    }
-
-    @PatchMapping("/{id}/popularity")
-    public Mono<ResponseEntity<PointOfInterestDTO>> updatePopularityScore(
-            @PathVariable UUID id,
-            @RequestParam Float newScore) {
-        return service.updatePopularityScore(id, newScore)
-                .map(dto -> ResponseEntity.ok(dto))
-                .onErrorReturn(ResponseEntity.notFound().build());
-    }
-
-    // Endpoints de streaming pour de gros volumes
-    @GetMapping(value = "/stream", produces = "application/stream+json")
-    public Flux<PointOfInterestDTO> streamAll() {
-        return service.findAll();
-    }
-
-    @GetMapping(value = "/organization/{organizationId}/stream", produces = "application/stream+json")
-    public Flux<PointOfInterestDTO> streamByOrganization(@PathVariable UUID organizationId) {
-        return service.findByOrganizationId(organizationId);
+        return poiService.existsByNameAndOrganization(name, organizationId, excludeId)
+                .map(exists -> ResponseEntity.ok(exists))
+                .onErrorResume(Exception.class,
+                        ex -> {
+                            log.error("Error checking POI name existence", ex);
+                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                        });
     }
 }

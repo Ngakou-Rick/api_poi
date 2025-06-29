@@ -25,6 +25,9 @@ public class PointOfInterest {
     @Column("poi_id")
     private UUID poiId;
 
+    @Column("created_by_user_id")
+    private UUID created_by_user_id;
+
     @Column("organization_id")
     private UUID organizationId;
 

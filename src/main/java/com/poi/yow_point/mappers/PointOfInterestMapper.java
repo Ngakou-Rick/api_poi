@@ -1,140 +1,196 @@
 package com.poi.yow_point.mappers;
 
-import com.poi.yow_point.dto.PointOfInterestDTO;
 import com.poi.yow_point.models.PointOfInterest;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.poi.yow_point.dto.PointOfInterestDTO;
+import io.r2dbc.postgresql.codec.Json;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class PointOfInterestMapper {
 
     private final ObjectMapper objectMapper;
 
-    public PointOfInterestMapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public PointOfInterestMapper() {
+        this.objectMapper = new ObjectMapper();
     }
 
-    public Mono<PointOfInterestDTO> toDto(PointOfInterest entity) {
-        return Mono.fromCallable(() -> {
-            PointOfInterestDTO dto = PointOfInterestDTO.builder()
-                    .poiId(entity.getPoiId())
-                    .organizationId(entity.getOrganizationId())
-                    .poiName(entity.getPoiName())
-                    .poiType(entity.getPoiType())
-                    .poiCategory(entity.getPoiCategory())
-                    .poiDescription(entity.getPoiDescription())
-                    .latitude(entity.getLatitude())
-                    .longitude(entity.getLongitude())
-                    .addressStreetNumber(entity.getAddressStreetNumber())
-                    .addressStreetName(entity.getAddressStreetName())
-                    .addressCity(entity.getAddressCity())
-                    .addressPostalCode(entity.getAddressPostalCode())
-                    .addressCountry(entity.getAddressCountry())
-                    .phoneNumber(entity.getPhoneNumber())
-                    .websiteUrl(entity.getWebsiteUrl())
-                    .poiImagesUrls(entity.getPoiImagesUrlsList())
-                    .poiAmenities(entity.getPoiAmenitiesList())
-                    .poiKeywords(parseKeywords(entity.getPoiKeywords()))
-                    .popularityScore(entity.getPopularityScore())
-                    .isActive(entity.getIsActive())
-                    .createdAt(entity.getCreatedAt())
-                    .updatedAt(entity.getUpdatedAt())
-                    .build();
+    /**
+     * Convertit une entité PointOfInterest en DTO
+     */
+    public PointOfInterestDTO toDto(PointOfInterest entity) {
+        if (entity == null) {
+            return null;
+        }
 
-            // Conversion JSON pour les objets complexes
-            dto.setOperationTimePlan(parseOperationTimePlan(entity.getOperationTimePlanJson()));
-            dto.setPoiContacts(parsePoiContacts(entity.getPoiContactsJson()));
-
-            return dto;
-        });
+        return PointOfInterestDTO.builder()
+                .poiId(entity.getPoiId())
+                .createdByUserId(entity.getCreated_by_user_id())
+                .organizationId(entity.getOrganizationId())
+                .poiName(entity.getPoiName())
+                .poiType(entity.getPoiType())
+                .poiCategory(entity.getPoiCategory())
+                .poiDescription(entity.getPoiDescription())
+                .latitude(entity.getLatitude())
+                .longitude(entity.getLongitude())
+                .addressStreetNumber(entity.getAddressStreetNumber())
+                .addressStreetName(entity.getAddressStreetName())
+                .addressCity(entity.getAddressCity())
+                .addressPostalCode(entity.getAddressPostalCode())
+                .addressCountry(entity.getAddressCountry())
+                .phoneNumber(entity.getPhoneNumber())
+                .websiteUrl(entity.getWebsiteUrl())
+                .operationTimePlan(parseJsonToMap(entity.getOperationTimePlanJson()))
+                .poiContacts(parseJsonToMap(entity.getPoiContactsJson()))
+                .poiImagesUrls(entity.getPoiImagesUrlsList())
+                .poiAmenities(entity.getPoiAmenitiesList())
+                .poiKeywords(parseKeywords(entity.getPoiKeywords()))
+                .popularityScore(entity.getPopularityScore())
+                .isActive(entity.getIsActive())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
     }
 
-    public Mono<PointOfInterest> toEntity(PointOfInterestDTO dto) {
-        return Mono.fromCallable(() -> {
-            PointOfInterest entity = PointOfInterest.builder()
-                    .poiId(dto.getPoiId())
-                    .organizationId(dto.getOrganizationId())
-                    .poiName(dto.getPoiName())
-                    .poiType(dto.getPoiType())
-                    .poiCategory(dto.getPoiCategory())
-                    .poiDescription(dto.getPoiDescription())
-                    .latitude(dto.getLatitude())
-                    .longitude(dto.getLongitude())
-                    .addressStreetNumber(dto.getAddressStreetNumber())
-                    .addressStreetName(dto.getAddressStreetName())
-                    .addressCity(dto.getAddressCity())
-                    .addressPostalCode(dto.getAddressPostalCode())
-                    .addressCountry(dto.getAddressCountry())
-                    .phoneNumber(dto.getPhoneNumber())
-                    .websiteUrl(dto.getWebsiteUrl())
-                    .popularityScore(dto.getPopularityScore())
-                    .isActive(dto.getIsActive())
-                    .createdAt(dto.getCreatedAt())
-                    .updatedAt(dto.getUpdatedAt())
-                    .build();
+    /**
+     * Convertit un DTO en entité PointOfInterest
+     */
+    public PointOfInterest toEntity(PointOfInterestDTO dto) {
+        if (dto == null) {
+            return null;
+        }
 
-            // Conversion des listes
-            entity.setPoiImagesUrlsList(dto.getPoiImagesUrls());
-            entity.setPoiAmenitiesList(dto.getPoiAmenities());
-            entity.setPoiKeywords(formatKeywords(dto.getPoiKeywords()));
-
-            // Conversion JSON pour les objets complexes
-            entity.setOperationTimePlanJson(formatOperationTimePlan(dto.getOperationTimePlan()));
-            entity.setPoiContactsJson(formatPoiContacts(dto.getPoiContacts()));
-
-            return entity;
-        });
+        return PointOfInterest.builder()
+                .poiId(dto.getPoiId())
+                .created_by_user_id(dto.getCreatedByUserId())
+                .organizationId(dto.getOrganizationId())
+                .poiName(dto.getPoiName())
+                .poiType(dto.getPoiType())
+                .poiCategory(dto.getPoiCategory())
+                .poiDescription(dto.getPoiDescription())
+                .latitude(dto.getLatitude())
+                .longitude(dto.getLongitude())
+                .addressStreetNumber(dto.getAddressStreetNumber())
+                .addressStreetName(dto.getAddressStreetName())
+                .addressCity(dto.getAddressCity())
+                .addressPostalCode(dto.getAddressPostalCode())
+                .addressCountry(dto.getAddressCountry())
+                .phoneNumber(dto.getPhoneNumber())
+                .websiteUrl(dto.getWebsiteUrl())
+                .operationTimePlanJson(mapToJson(dto.getOperationTimePlan()))
+                .poiContactsJson(mapToJson(dto.getPoiContacts()))
+                .poiImagesUrls(listToString(dto.getPoiImagesUrls()))
+                .poiAmenities(listToString(dto.getPoiAmenities()))
+                .poiKeywords(listToString(dto.getPoiKeywords()))
+                .popularityScore(dto.getPopularityScore())
+                .isActive(dto.getIsActive())
+                .createdAt(dto.getCreatedAt())
+                .updatedAt(dto.getUpdatedAt())
+                .build();
     }
 
-    // Méthodes utilitaires pour la conversion JSON
-    private Map<String, Object> parseOperationTimePlan(String json) {
-        if (json == null || json.trim().isEmpty()) {
+    /**
+     * Met à jour une entité existante avec les données du DTO
+     */
+    public PointOfInterest updateEntityFromDto(PointOfInterest existingEntity, PointOfInterestDTO dto) {
+        if (existingEntity == null || dto == null) {
+            return existingEntity;
+        }
+
+        // Mise à jour des champs modifiables uniquement
+        if (dto.getPoiName() != null) {
+            existingEntity.setPoiName(dto.getPoiName());
+        }
+        if (dto.getPoiType() != null) {
+            existingEntity.setPoiType(dto.getPoiType());
+        }
+        if (dto.getPoiCategory() != null) {
+            existingEntity.setPoiCategory(dto.getPoiCategory());
+        }
+        if (dto.getPoiDescription() != null) {
+            existingEntity.setPoiDescription(dto.getPoiDescription());
+        }
+        if (dto.getLatitude() != null) {
+            existingEntity.setLatitude(dto.getLatitude());
+        }
+        if (dto.getLongitude() != null) {
+            existingEntity.setLongitude(dto.getLongitude());
+        }
+        if (dto.getAddressStreetNumber() != null) {
+            existingEntity.setAddressStreetNumber(dto.getAddressStreetNumber());
+        }
+        if (dto.getAddressStreetName() != null) {
+            existingEntity.setAddressStreetName(dto.getAddressStreetName());
+        }
+        if (dto.getAddressCity() != null) {
+            existingEntity.setAddressCity(dto.getAddressCity());
+        }
+        if (dto.getAddressPostalCode() != null) {
+            existingEntity.setAddressPostalCode(dto.getAddressPostalCode());
+        }
+        if (dto.getAddressCountry() != null) {
+            existingEntity.setAddressCountry(dto.getAddressCountry());
+        }
+        if (dto.getPhoneNumber() != null) {
+            existingEntity.setPhoneNumber(dto.getPhoneNumber());
+        }
+        if (dto.getWebsiteUrl() != null) {
+            existingEntity.setWebsiteUrl(dto.getWebsiteUrl());
+        }
+        if (dto.getOperationTimePlan() != null) {
+            existingEntity.setOperationTimePlanJson(mapToJson(dto.getOperationTimePlan()));
+        }
+        if (dto.getPoiContacts() != null) {
+            existingEntity.setPoiContactsJson(mapToJson(dto.getPoiContacts()));
+        }
+        if (dto.getPoiImagesUrls() != null) {
+            existingEntity.setPoiImagesUrls(listToString(dto.getPoiImagesUrls()));
+        }
+        if (dto.getPoiAmenities() != null) {
+            existingEntity.setPoiAmenities(listToString(dto.getPoiAmenities()));
+        }
+        if (dto.getPoiKeywords() != null) {
+            existingEntity.setPoiKeywords(listToString(dto.getPoiKeywords()));
+        }
+        if (dto.getPopularityScore() != null) {
+            existingEntity.setPopularityScore(dto.getPopularityScore());
+        }
+        if (dto.getIsActive() != null) {
+            existingEntity.setIsActive(dto.getIsActive());
+        }
+
+        return existingEntity;
+    }
+
+    /**
+     * Méthodes utilitaires privées
+     */
+    private Map<String, Object> parseJsonToMap(Json jsonData) {
+        if (jsonData == null) {
             return new HashMap<>();
         }
         try {
-            return objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
-            });
-        } catch (JsonProcessingException e) {
+            return objectMapper.readValue(jsonData.asString(),
+                    new TypeReference<Map<String, Object>>() {
+                    });
+        } catch (Exception e) {
             return new HashMap<>();
         }
     }
 
-    private String formatOperationTimePlan(Map<String, Object> operationTimePlan) {
-        if (operationTimePlan == null || operationTimePlan.isEmpty()) {
-            return null;
+    private Json mapToJson(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) {
+            return Json.of("{}");
         }
         try {
-            return objectMapper.writeValueAsString(operationTimePlan);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
-    }
-
-    private List<Map<String, Object>> parsePoiContacts(String json) {
-        if (json == null || json.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
-        try {
-            return objectMapper.readValue(json, new TypeReference<List<Map<String, Object>>>() {
-            });
-        } catch (JsonProcessingException e) {
-            return new ArrayList<>();
-        }
-    }
-
-    private String formatPoiContacts(List<Map<String, Object>> contacts) {
-        if (contacts == null || contacts.isEmpty()) {
-            return null;
-        }
-        try {
-            return objectMapper.writeValueAsString(contacts);
-        } catch (JsonProcessingException e) {
-            return null;
+            String jsonString = objectMapper.writeValueAsString(map);
+            return Json.of(jsonString);
+        } catch (Exception e) {
+            return Json.of("{}");
         }
     }
 
@@ -142,13 +198,19 @@ public class PointOfInterestMapper {
         if (keywords == null || keywords.trim().isEmpty()) {
             return new ArrayList<>();
         }
-        return Arrays.asList(keywords.split(","));
+        return Arrays.stream(keywords.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
     }
 
-    private String formatKeywords(List<String> keywords) {
-        if (keywords == null || keywords.isEmpty()) {
+    private String listToString(List<String> list) {
+        if (list == null || list.isEmpty()) {
             return null;
         }
-        return String.join(",", keywords);
+        return list.stream()
+                .filter(Objects::nonNull)
+                .filter(s -> !s.trim().isEmpty())
+                .collect(Collectors.joining(","));
     }
 }
