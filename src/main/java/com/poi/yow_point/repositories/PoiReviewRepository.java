@@ -33,4 +33,5 @@ public interface PoiReviewRepository extends R2dbcRepository<PoiReview, UUID> {
 
     @Query("SELECT COUNT(*) FROM poi_review WHERE poi_id = :poiId")
     Mono<Long> countByPoiId(@Param("poiId") UUID poiId);
+
 }

@@ -1,5 +1,6 @@
 package com.poi.yow_point.models;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,19 +25,19 @@ public class PoiAccessLog {
     private UUID accessId;
 
     @Column("poi_id")
-    private UUID poiId; // Foreign key reference au lieu de @ManyToOne
+    private UUID poiId;
 
     @Column("organization_id")
-    private UUID organizationId; // Foreign key reference au lieu de @ManyToOne
+    private UUID organizationId;
 
     @Column("platform_type")
-    private String platformType; // 'Android', 'iOS', 'Linux', 'Web', 'Windows', etc.
+    private String platformType;
 
     @Column("user_id")
-    private UUID userId; // Optional user
+    private UUID userId;
 
     @Column("access_type")
-    private String accessType; // 'view', 'click', 'review', etc.
+    private String accessType;
 
     @CreatedDate
     @Column("access_datetime")
@@ -44,11 +45,20 @@ public class PoiAccessLog {
     private OffsetDateTime accessDatetime = OffsetDateTime.now();
 
     @Column("metadata")
-    private String metadata; // JSONB stocké comme String
+    private JsonNode metadata;
 
-    // Méthodes utilitaires pour la gestion des métadonnées JSON
+    // Méthodes utilitaires
     public boolean hasMetadata() {
-        return metadata != null && !metadata.trim().isEmpty();
+        return metadata != null && !metadata.isNull() && !metadata.isEmpty();
+    }
+
+    // Setter personnalisé pour gérer les valeurs null
+    public void setMetadata(JsonNode metadata) {
+        if (metadata != null && metadata.isNull()) {
+            this.metadata = null;
+        } else {
+            this.metadata = metadata;
+        }
     }
 
 }

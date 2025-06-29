@@ -2,6 +2,9 @@ package com.poi.yow_point.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,19 +25,28 @@ public class PoiPlatformStatService {
     private final PoiPlatformStatRepository repository;
     private final PoiPlatformStatMapper mapper;
 
+    @Autowired
+    private R2dbcEntityTemplate entityTemplate;
+
     /**
      * Créer une nouvelle statistique
      */
     public Mono<PoiPlatformStatDTO> createStat(PoiPlatformStatDTO statDTO) {
-        return Mono.fromCallable(() -> {
-            PoiPlatformStat entity = mapper.toEntity(statDTO);
-            if (entity.getStatId() == null) {
-                entity.setStatId(UUID.randomUUID());
-            }
-            return entity;
-        })
-                .flatMap(repository::save)
-                .map(mapper::toDTO)
+        return Mono.just(statDTO)
+                .map(dto -> {
+                    // Création de l'entité avec valeurs par défaut
+                    PoiPlatformStat entity = mapper.toEntity(dto);
+                    if (entity.getStatId() == null) {
+                        entity.setStatId(UUID.randomUUID());
+                    }
+                    if (entity.getStatDate() == null) {
+                        entity.setStatDate(LocalDate.now());
+                    }
+                    return entity;
+                })
+                .flatMap(entity -> entityTemplate.insert(PoiPlatformStat.class)
+                        .using(entity)
+                        .map(mapper::toDTO))
                 .doOnSuccess(dto -> log.info("Statistique créée avec l'ID: {}", dto.getStatId()))
                 .doOnError(error -> log.error("Erreur lors de la création de la statistique", error));
     }

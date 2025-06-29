@@ -1,8 +1,9 @@
 package com.poi.yow_point.repositories;
 
 import com.poi.yow_point.models.PoiAccessLog;
-import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,41 +14,55 @@ import java.util.UUID;
 @Repository
 public interface PoiAccessLogRepository extends R2dbcRepository<PoiAccessLog, UUID> {
 
-    // Trouver tous les accès pour un POI spécifique
+    // Recherche par POI ID
     Flux<PoiAccessLog> findByPoiId(UUID poiId);
 
-    // Trouver tous les accès pour une organisation
+    // Recherche par Organization ID
     Flux<PoiAccessLog> findByOrganizationId(UUID organizationId);
 
-    // Trouver tous les accès d'un utilisateur
+    // Recherche par User ID
     Flux<PoiAccessLog> findByUserId(UUID userId);
 
-    // Trouver les accès par type de plateforme
-    Flux<PoiAccessLog> findByPlatformType(String platformType);
-
-    // Trouver les accès par type d'accès
+    // Recherche par type d'accès
     Flux<PoiAccessLog> findByAccessType(String accessType);
 
-    // Trouver les accès dans une période donnée
-    Flux<PoiAccessLog> findByAccessDatetimeBetween(OffsetDateTime startDate, OffsetDateTime endDate);
+    // Recherche par plateforme
+    Flux<PoiAccessLog> findByPlatformType(String platformType);
 
-    // Compter les accès pour un POI
+    // Recherche par POI et organisation
+    Flux<PoiAccessLog> findByPoiIdAndOrganizationId(UUID poiId, UUID organizationId);
+
+    // Recherche par période
+    @Query("SELECT * FROM poi_access_log WHERE access_datetime BETWEEN :startDate AND :endDate ORDER BY access_datetime DESC")
+    Flux<PoiAccessLog> findByAccessDatetimeBetween(@Param("startDate") OffsetDateTime startDate,
+            @Param("endDate") OffsetDateTime endDate);
+
+    // Recherche des logs récents pour un POI
+    @Query("SELECT * FROM poi_access_log WHERE poi_id = :poiId AND access_datetime >= :since ORDER BY access_datetime DESC")
+    Flux<PoiAccessLog> findRecentByPoiId(@Param("poiId") UUID poiId,
+            @Param("since") OffsetDateTime since);
+
+    // Compter les accès par POI
     @Query("SELECT COUNT(*) FROM poi_access_log WHERE poi_id = :poiId")
-    Mono<Long> countByPoiId(UUID poiId);
+    Mono<Long> countByPoiId(@Param("poiId") UUID poiId);
 
-    // Compter les accès uniques (par utilisateur) pour un POI
-    @Query("SELECT COUNT(DISTINCT user_id) FROM poi_access_log WHERE poi_id = :poiId AND user_id IS NOT NULL")
-    Mono<Long> countUniqueUsersByPoiId(UUID poiId);
+    // Compter les accès par type pour un POI
+    @Query("SELECT COUNT(*) FROM poi_access_log WHERE poi_id = :poiId AND access_type = :accessType")
+    Mono<Long> countByPoiIdAndAccessType(@Param("poiId") UUID poiId,
+            @Param("accessType") String accessType);
 
-    // Statistiques d'accès par plateforme pour un POI
-    @Query("SELECT platform_type, COUNT(*) as count FROM poi_access_log WHERE poi_id = :poiId GROUP BY platform_type")
-    Flux<Object[]> getAccessStatsByPlatformForPoi(UUID poiId);
+    // Supprimer les logs anciens
+    @Query("DELETE FROM poi_access_log WHERE access_datetime < :beforeDate")
+    Mono<Long> deleteOldLogs(@Param("beforeDate") OffsetDateTime beforeDate);
 
-    // Accès récents pour un POI (dernières 24h)
-    @Query("SELECT * FROM poi_access_log WHERE poi_id = :poiId AND access_datetime > :since ORDER BY access_datetime DESC")
-    Flux<PoiAccessLog> findRecentAccessByPoiId(UUID poiId, OffsetDateTime since);
+    // Recherche avec pagination (utilise LIMIT et OFFSET)
+    @Query("SELECT * FROM poi_access_log WHERE poi_id = :poiId ORDER BY access_datetime DESC LIMIT :limit OFFSET :offset")
+    Flux<PoiAccessLog> findByPoiIdWithPagination(@Param("poiId") UUID poiId,
+            @Param("limit") int limit,
+            @Param("offset") int offset);
 
-    // Accès les plus fréquents par organisation
-    @Query("SELECT poi_id, COUNT(*) as access_count FROM poi_access_log WHERE organization_id = :orgId GROUP BY poi_id ORDER BY access_count DESC LIMIT :limit")
-    Flux<Object[]> getMostAccessedPoisByOrganization(UUID orgId, int limit);
+    // Statistiques par plateforme pour une organisation
+    @Query("SELECT platform_type, COUNT(*) as count FROM poi_access_log WHERE organization_id = :orgId GROUP BY platform_type")
+    Flux<Object[]> getPlatformStatsForOrganization(@Param("orgId") UUID organizationId);
+
 }

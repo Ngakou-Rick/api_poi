@@ -1,6 +1,7 @@
 package com.poi.yow_point.mappers;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 //import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
@@ -15,5 +16,6 @@ public interface PoiReviewMapper {
     PoiReviewDTO toDTO(PoiReview poiReview);
 
     // Mapping direct également
+    @Mapping(target = "reviewId", ignore = true)
     PoiReview toEntity(PoiReviewDTO poiReviewDTO);
 }

@@ -2,6 +2,9 @@ package com.poi.yow_point.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,17 +25,18 @@ public class PoiReviewService {
     private final PoiReviewRepository poiReviewRepository;
     private final PoiReviewMapper poiReviewMapper;
 
-    public Mono<PoiReviewDTO> createReview(PoiReviewDTO reviewDTO) {
-        log.info("Creating review for POI: {}", reviewDTO.getPoiId());
+    @Autowired
+    private R2dbcEntityTemplate entityTemplate;
 
+    public Mono<PoiReviewDTO> createReview(PoiReviewDTO reviewDTO) {
         PoiReview review = poiReviewMapper.toEntity(reviewDTO);
         review.setReviewId(UUID.randomUUID());
         review.setCreatedAt(OffsetDateTime.now());
 
-        return poiReviewRepository.save(review)
+        return entityTemplate.insert(review) // Forces INSERT
                 .map(poiReviewMapper::toDTO)
                 .doOnSuccess(savedReview -> log.info("Review created with ID: {}", savedReview.getReviewId()))
-                .doOnError(error -> log.error("Error creating review: {}", error.getMessage()));
+                .doOnError(error -> log.error("Error creating review: {}", error.getMessage(), error));
     }
 
     public Mono<PoiReviewDTO> getReviewById(UUID reviewId) {
