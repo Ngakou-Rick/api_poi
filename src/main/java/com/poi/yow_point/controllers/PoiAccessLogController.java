@@ -17,17 +17,29 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/poi-access-logs")
 @RequiredArgsConstructor
+@Tag(name = "POI Access Logs", description = "API for managing Point of Interest access logs")
 public class PoiAccessLogController {
 
     private final PoiAccessLogService service;
 
-    /**
-     * Crée un nouveau log d'accès
-     */
+    @Operation(summary = "Create access log", description = "Creates a new access log entry")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Access log created successfully", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<PoiAccessLogDTO> createAccessLog(@Valid @RequestBody PoiAccessLogDTO dto) {
@@ -35,119 +47,120 @@ public class PoiAccessLogController {
         return service.createAccessLog(dto);
     }
 
-    /**
-     * Récupère un log d'accès par ID
-     */
+    @Operation(summary = "Get access log by ID", description = "Retrieves a specific access log by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Access log found", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Access log not found")
+    })
     @GetMapping(value = "/{accessId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<PoiAccessLogDTO> getAccessLogById(@PathVariable UUID accessId) {
+    public Mono<PoiAccessLogDTO> getAccessLogById(
+            @Parameter(description = "ID of the access log to retrieve", required = true) @PathVariable UUID accessId) {
         log.info("Récupération du log d'accès: {}", accessId);
         return service.getAccessLogById(accessId);
     }
 
-    /**
-     * Récupère tous les logs d'accès
-     */
+    @Operation(summary = "Get all access logs", description = "Retrieves all access logs")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved all access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<PoiAccessLogDTO> getAllAccessLogs() {
         log.info("Récupération de tous les logs d'accès");
         return service.getAllAccessLogs();
     }
 
-    /**
-     * Récupère les logs d'accès par POI
-     */
+    @Operation(summary = "Get access logs by POI", description = "Retrieves all access logs for a specific POI")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping("/poi/{poiId}")
-    public Flux<PoiAccessLogDTO> getAccessLogsByPoiId(@PathVariable UUID poiId) {
+    public Flux<PoiAccessLogDTO> getAccessLogsByPoiId(
+            @Parameter(description = "POI ID to filter access logs", required = true) @PathVariable UUID poiId) {
         log.info("Récupération des logs d'accès pour POI: {}", poiId);
         return service.getAccessLogsByPoiId(poiId);
     }
 
-    /**
-     * Récupère les logs d'accès par organisation
-     */
+    @Operation(summary = "Get access logs by organization", description = "Retrieves all access logs for a specific organization")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping("/organization/{organizationId}")
-    public Flux<PoiAccessLogDTO> getAccessLogsByOrganizationId(@PathVariable UUID organizationId) {
+    public Flux<PoiAccessLogDTO> getAccessLogsByOrganizationId(
+            @Parameter(description = "Organization ID to filter access logs", required = true) @PathVariable UUID organizationId) {
         log.info("Récupération des logs d'accès pour organisation: {}", organizationId);
         return service.getAccessLogsByOrganizationId(organizationId);
     }
 
-    /**
-     * Récupère les logs d'accès par utilisateur
-     */
+    @Operation(summary = "Get access logs by user", description = "Retrieves all access logs for a specific user")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping("/user/{userId}")
-    public Flux<PoiAccessLogDTO> getAccessLogsByUserId(@PathVariable UUID userId) {
+    public Flux<PoiAccessLogDTO> getAccessLogsByUserId(
+            @Parameter(description = "User ID to filter access logs", required = true) @PathVariable UUID userId) {
         log.info("Récupération des logs d'accès pour utilisateur: {}", userId);
         return service.getAccessLogsByUserId(userId);
     }
 
-    /**
-     * Récupère les logs d'accès par type d'accès
-     */
+    @Operation(summary = "Get access logs by access type", description = "Retrieves all access logs for a specific access type")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping("/access-type/{accessType}")
-    public Flux<PoiAccessLogDTO> getAccessLogsByAccessType(@PathVariable String accessType) {
+    public Flux<PoiAccessLogDTO> getAccessLogsByAccessType(
+            @Parameter(description = "Access type to filter logs (e.g., 'entry', 'exit')", required = true) @PathVariable String accessType) {
         log.info("Récupération des logs d'accès pour type: {}", accessType);
         return service.getAccessLogsByAccessType(accessType);
     }
 
-    /**
-     * Récupère les logs d'accès par plateforme
-     */
+    @Operation(summary = "Get access logs by platform", description = "Retrieves all access logs for a specific platform")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping("/platform/{platformType}")
-    public Flux<PoiAccessLogDTO> getAccessLogsByPlatformType(@PathVariable String platformType) {
+    public Flux<PoiAccessLogDTO> getAccessLogsByPlatformType(
+            @Parameter(description = "Platform type to filter logs (e.g., 'mobile', 'web')", required = true) @PathVariable String platformType) {
         log.info("Récupération des logs d'accès pour plateforme: {}", platformType);
         return service.getAccessLogsByPlatformType(platformType);
     }
 
-    /**
-     * Récupère les logs d'accès pour un POI et une organisation
-     */
+    @Operation(summary = "Get access logs by POI and organization", description = "Retrieves all access logs for a specific POI and organization")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping("/poi/{poiId}/organization/{organizationId}")
     public Flux<PoiAccessLogDTO> getAccessLogsByPoiAndOrganization(
-            @PathVariable UUID poiId,
-            @PathVariable UUID organizationId) {
+            @Parameter(description = "POI ID to filter access logs", required = true) @PathVariable UUID poiId,
+            @Parameter(description = "Organization ID to filter access logs", required = true) @PathVariable UUID organizationId) {
         log.info("Récupération des logs d'accès pour POI: {} et organisation: {}", poiId, organizationId);
         return service.getAccessLogsByPoiAndOrganization(poiId, organizationId);
     }
 
-    /**
-     * Récupère les logs d'accès par période
-     */
+    @Operation(summary = "Get access logs by date range", description = "Retrieves all access logs between two dates")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping("/date-range")
     public Flux<PoiAccessLogDTO> getAccessLogsByDateRange(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endDate) {
+            @Parameter(description = "Start date of the range (ISO format)", required = true) @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startDate,
+            @Parameter(description = "End date of the range (ISO format)", required = true) @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endDate) {
         log.info("Récupération des logs d'accès entre {} et {}", startDate, endDate);
         return service.getAccessLogsByDateRange(startDate, endDate);
     }
 
-    /**
-     * Récupère les logs d'accès récents pour un POI
-     */
+    @Operation(summary = "Get recent access logs by POI", description = "Retrieves recent access logs for a specific POI since a given date")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping("/poi/{poiId}/recent")
     public Flux<PoiAccessLogDTO> getRecentAccessLogsByPoiId(
-            @PathVariable UUID poiId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime since) {
+            @Parameter(description = "POI ID to filter access logs", required = true) @PathVariable UUID poiId,
+            @Parameter(description = "Date from which to retrieve logs (ISO format)", required = true) @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime since) {
         log.info("Récupération des logs d'accès récents pour POI: {} depuis {}", poiId, since);
         return service.getRecentAccessLogsByPoiId(poiId, since);
     }
 
-    /**
-     * Récupère les logs d'accès avec pagination
-     */
+    @Operation(summary = "Get paginated access logs by POI", description = "Retrieves access logs for a specific POI with pagination")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved access logs", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class)))
     @GetMapping("/poi/{poiId}/paginated")
     public Flux<PoiAccessLogDTO> getAccessLogsByPoiIdWithPagination(
-            @PathVariable UUID poiId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @Parameter(description = "POI ID to filter access logs", required = true) @PathVariable UUID poiId,
+            @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page", example = "10") @RequestParam(defaultValue = "10") int size) {
         log.info("Récupération paginée des logs d'accès pour POI: {} (page: {}, taille: {})", poiId, page, size);
         return service.getAccessLogsByPoiIdWithPagination(poiId, page, size);
     }
 
-    /**
-     * Compte les accès pour un POI
-     */
+    @Operation(summary = "Count access logs by POI", description = "Counts all access logs for a specific POI")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Count retrieved successfully", content = @Content(schema = @Schema(implementation = Long.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/poi/{poiId}/count")
-    public Mono<ResponseEntity<Long>> countAccessLogsByPoiId(@PathVariable UUID poiId) {
+    public Mono<ResponseEntity<Long>> countAccessLogsByPoiId(
+            @Parameter(description = "POI ID to count access logs", required = true) @PathVariable UUID poiId) {
         log.info("Comptage des accès pour POI: {}", poiId);
 
         return service.countAccessLogsByPoiId(poiId)
@@ -155,13 +168,15 @@ public class PoiAccessLogController {
                 .onErrorReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    /**
-     * Compte les accès par type pour un POI
-     */
+    @Operation(summary = "Count access logs by POI and access type", description = "Counts all access logs for a specific POI and access type")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Count retrieved successfully", content = @Content(schema = @Schema(implementation = Long.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/poi/{poiId}/count/access-type/{accessType}")
     public Mono<ResponseEntity<Long>> countAccessLogsByPoiIdAndAccessType(
-            @PathVariable UUID poiId,
-            @PathVariable String accessType) {
+            @Parameter(description = "POI ID to count access logs", required = true) @PathVariable UUID poiId,
+            @Parameter(description = "Access type to filter count (e.g., 'entry', 'exit')", required = true) @PathVariable String accessType) {
         log.info("Comptage des accès de type {} pour POI: {}", accessType, poiId);
 
         return service.countAccessLogsByPoiIdAndAccessType(poiId, accessType)
@@ -169,21 +184,24 @@ public class PoiAccessLogController {
                 .onErrorReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    /**
-     * Récupère les statistiques par plateforme pour une organisation
-     */
+    @Operation(summary = "Get platform statistics by organization", description = "Retrieves platform statistics (count by platform) for a specific organization")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved platform statistics", content = @Content(schema = @Schema(implementation = Map.class)))
     @GetMapping("/organization/{organizationId}/platform-stats")
-    public Flux<Map<String, Object>> getPlatformStatsForOrganization(@PathVariable UUID organizationId) {
+    public Flux<Map<String, Object>> getPlatformStatsForOrganization(
+            @Parameter(description = "Organization ID to get platform statistics", required = true) @PathVariable UUID organizationId) {
         log.info("Récupération des statistiques par plateforme pour organisation: {}", organizationId);
         return service.getPlatformStatsForOrganization(organizationId);
     }
 
-    /**
-     * Met à jour un log d'accès
-     */
+    @Operation(summary = "Update access log", description = "Updates an existing access log")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Access log updated successfully", content = @Content(schema = @Schema(implementation = PoiAccessLogDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Access log not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data")
+    })
     @PutMapping("/{accessId}")
     public Mono<ResponseEntity<PoiAccessLogDTO>> updateAccessLog(
-            @PathVariable UUID accessId,
+            @Parameter(description = "ID of the access log to update", required = true) @PathVariable UUID accessId,
             @Valid @RequestBody PoiAccessLogDTO dto) {
         log.info("Mise à jour du log d'accès: {}", accessId);
 
@@ -192,11 +210,14 @@ public class PoiAccessLogController {
                 .onErrorReturn(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Supprime un log d'accès
-     */
+    @Operation(summary = "Delete access log", description = "Deletes a specific access log by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Access log deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Access log not found")
+    })
     @DeleteMapping("/{accessId}")
-    public Mono<ResponseEntity<Void>> deleteAccessLog(@PathVariable UUID accessId) {
+    public Mono<ResponseEntity<Void>> deleteAccessLog(
+            @Parameter(description = "ID of the access log to delete", required = true) @PathVariable UUID accessId) {
         log.info("Suppression du log d'accès: {}", accessId);
 
         return service.deleteAccessLog(accessId)
@@ -204,12 +225,14 @@ public class PoiAccessLogController {
                 .onErrorReturn(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Supprime les logs anciens
-     */
+    @Operation(summary = "Delete old access logs", description = "Deletes all access logs older than a specified date")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Old access logs deleted successfully", content = @Content(schema = @Schema(implementation = Map.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @DeleteMapping("/cleanup")
     public Mono<ResponseEntity<Map<String, Object>>> deleteOldLogs(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime beforeDate) {
+            @Parameter(description = "Delete logs older than this date (ISO format)", required = true) @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime beforeDate) {
         log.info("Suppression des logs d'accès antérieurs à: {}", beforeDate);
 
         return service.deleteOldLogs(beforeDate)
@@ -222,9 +245,8 @@ public class PoiAccessLogController {
                 .onErrorReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
-    /**
-     * Endpoint de santé pour vérifier le service
-     */
+    @Operation(summary = "Service health check", description = "Checks if the service is running")
+    @ApiResponse(responseCode = "200", description = "Service is healthy", content = @Content(schema = @Schema(implementation = Map.class)))
     @GetMapping("/health")
     public Mono<ResponseEntity<Map<String, String>>> health() {
         return Mono.just(ResponseEntity.ok(Map.of(
