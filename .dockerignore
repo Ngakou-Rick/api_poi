@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+
+# Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
+!/.mvn/wrapper/maven-wrapper.properties
+
+# Fichiers IDE
+.idea/
+.project
+.classpath
+.settings/
+*.iml
+*.project
+*.classpath
+*.settings
+
+# Fichiers spécifiques à VSCode
+.vscode/
+
+# Fichiers OS
+.DS_Store
+Thumbs.db
+
+# Fichiers de log
+logs/
+*.log
+
+# Fichiers temporaires ou de build local (target/ devrait déjà couvrir la plupart)
+# *.jar # Commenté car le Dockerfile copie explicitement le jar depuis target/ dans l'étape de build
+# *.war # Commenté car le Dockerfile copie explicitement le war depuis target/ dans l'étape de build

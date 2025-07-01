@@ -31,6 +31,8 @@
 		<jts.version>1.19.0</jts.version>
 		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
 		<lombok.version>1.18.32</lombok.version>
+		<spring-restdocs.version>3.0.0</spring-restdocs.version>
+
 		<!-- spring-restdocs.version sera géré par spring-boot-starter-parent si spring-boot-starter-restdocs est utilisé, sinon définissez-le -->
 	</properties>
 	<dependencies>
@@ -42,6 +44,7 @@
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
+
 		<!-- Spring Boot Starter Data R2DBC -->
 		<dependency>
     		<groupId>org.springframework.boot</groupId>
@@ -137,10 +140,16 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.restdocs</groupId>
-			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+    		<groupId>org.springdoc</groupId>
+    		<artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+    		<version>2.5.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
