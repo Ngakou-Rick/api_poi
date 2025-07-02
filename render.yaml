@@ -6,10 +6,9 @@ services:
     dockerfilePath: ./Dockerfile
     plan: starter
     branch: main
-    healthCheck:
-      path: /actuator/health
-      port: 8080
-      initialDelaySeconds: 90
+    # --- FIX 1: Health check properties are now top-level ---
+    healthCheckPath: /actuator/health
+    initialDelaySeconds: 90
     envVars:
       - key: SPRING_R2DBC_URL
         fromDatabase:
@@ -29,5 +28,5 @@ databases:
   - name: yowpoint-db
     databaseName: yowpointdb
     user: yowpoint_user
-    # Active PostGIS automatiquement !
-    postgisEnabled: true
+    # --- FIX 2: Removed 'postgisEnabled' as it's not a valid field.
+    # PostGIS is enabled by default on Render for all PostgreSQL databases.
