@@ -8,7 +8,7 @@ services:
     branch: main
     # --- FIX 1: Health check properties are now top-level ---
     healthCheckPath: /actuator/health
-    initialDelaySeconds: 90
+    # initialDelaySeconds: 90
     envVars:
       - key: SPRING_R2DBC_URL
         fromDatabase:
