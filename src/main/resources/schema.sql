@@ -1,4 +1,5 @@
--- Extensions de base uniquement
+-- 1. Extensions nécessaires
+CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Table des organisations
@@ -42,8 +43,7 @@ CREATE TABLE IF NOT EXISTS point_of_interest (
     poi_logo BYTEA,
     
     -- Coordonnées GPS simples (au lieu de GEOGRAPHY)
-    latitude DECIMAL(10, 8),
-    longitude DECIMAL(11, 8),
+    location_geog GEOGRAPHY(Point, 4326) NOT NULL, -- Latitude/Longitude
 
     -- Adresse décomposée (au lieu du type composite)
     address_street_number TEXT,
@@ -125,8 +125,8 @@ CREATE INDEX IF NOT EXISTS idx_poi_org_id ON point_of_interest (organization_id)
 CREATE INDEX IF NOT EXISTS idx_poi_type ON point_of_interest (poi_type);
 CREATE INDEX IF NOT EXISTS idx_poi_category ON point_of_interest (poi_category);
 CREATE INDEX IF NOT EXISTS idx_poi_name ON point_of_interest (poi_name);
-CREATE INDEX IF NOT EXISTS idx_poi_location ON point_of_interest (latitude, longitude);
 CREATE INDEX IF NOT EXISTS idx_poi_is_active ON point_of_interest (is_active);
+CREATE INDEX IF NOT EXISTS idx_poi_phone_number ON point_of_interest (phone_number);
 
 CREATE INDEX IF NOT EXISTS idx_access_log_poi ON poi_access_log (poi_id);
 CREATE INDEX IF NOT EXISTS idx_access_log_org ON poi_access_log (organization_id);
@@ -136,3 +136,5 @@ CREATE INDEX IF NOT EXISTS idx_access_log_date ON poi_access_log (access_datetim
 CREATE INDEX IF NOT EXISTS idx_poi_review_poi_id ON poi_review (poi_id);
 CREATE INDEX IF NOT EXISTS idx_poi_review_org ON poi_review (organization_id);
 CREATE INDEX IF NOT EXISTS idx_stat_org_platform ON poi_platform_stat (org_id, platform_type, stat_date);
+
+CREATE INDEX IF NOT EXISTS idx_poi_location_geog   ON point_of_interest USING GIST (location_geog);
