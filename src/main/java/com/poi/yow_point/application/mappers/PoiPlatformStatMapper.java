@@ -1,8 +1,6 @@
 package com.poi.yow_point.application.mappers;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.*;
 
 import com.poi.yow_point.infrastructure.entities.PoiPlatformStat;
 import com.poi.yow_point.presentation.dto.PoiPlatformStatDTO;

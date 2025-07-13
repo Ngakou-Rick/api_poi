@@ -1,8 +1,6 @@
 package com.poi.yow_point.application.mappers;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-//import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import com.poi.yow_point.infrastructure.entities.PoiReview;

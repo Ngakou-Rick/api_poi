@@ -3,12 +3,7 @@ package com.poi.yow_point.application.mappers;
 import com.poi.yow_point.infrastructure.entities.AppUser;
 import com.poi.yow_point.presentation.dto.AppUserDTO;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.CollectionMappingStrategy;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.SETTER_PREFERRED)
 public interface AppUserMapper {

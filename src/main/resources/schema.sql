@@ -120,6 +120,35 @@ CREATE TABLE IF NOT EXISTS poi_platform_stat (
     dislikes INT DEFAULT 0
 );
 
+-- Table des blogs
+CREATE TABLE IF NOT EXISTS blog (
+    blog_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
+    poi_id UUID NOT NULL REFERENCES point_of_interest(poi_id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    cover_image_url TEXT,
+    content TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Table des podcasts
+CREATE TABLE IF NOT EXISTS podcast (
+    podcast_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
+    poi_id UUID NOT NULL REFERENCES point_of_interest(poi_id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    cover_image_url TEXT,
+    audio_file_url TEXT,
+    duration_seconds INT, -- Durée en secondes pour plus de précision
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Index pour performance
 CREATE INDEX IF NOT EXISTS idx_poi_org_id ON point_of_interest (organization_id);
 CREATE INDEX IF NOT EXISTS idx_poi_type ON point_of_interest (poi_type);
@@ -137,4 +166,15 @@ CREATE INDEX IF NOT EXISTS idx_poi_review_poi_id ON poi_review (poi_id);
 CREATE INDEX IF NOT EXISTS idx_poi_review_org ON poi_review (organization_id);
 CREATE INDEX IF NOT EXISTS idx_stat_org_platform ON poi_platform_stat (org_id, platform_type, stat_date);
 
-CREATE INDEX IF NOT EXISTS idx_poi_location_geog   ON point_of_interest USING GIST (location_geog);
+CREATE INDEX IF NOT EXISTS idx_poi_location_geog ON point_of_interest USING GIST (location_geog);
+
+-- Index pour les nouvelles tables
+CREATE INDEX IF NOT EXISTS idx_blog_user_id ON blog (user_id);
+CREATE INDEX IF NOT EXISTS idx_blog_poi_id ON blog (poi_id);
+CREATE INDEX IF NOT EXISTS idx_blog_is_active ON blog (is_active);
+CREATE INDEX IF NOT EXISTS idx_blog_created_at ON blog (created_at);
+
+CREATE INDEX IF NOT EXISTS idx_podcast_user_id ON podcast (user_id);
+CREATE INDEX IF NOT EXISTS idx_podcast_poi_id ON podcast (poi_id);
+CREATE INDEX IF NOT EXISTS idx_podcast_is_active ON podcast (is_active);
+CREATE INDEX IF NOT EXISTS idx_podcast_created_at ON podcast (created_at);
