@@ -60,8 +60,11 @@ public class PointOfInterestDTO {
     @JsonProperty("address_country")
     private String addressCountry;
 
-    @JsonProperty("phone_number")
-    private String phoneNumber;
+    @JsonProperty("address_state_province")
+    private String stateProvince;
+
+    @JsonProperty("address_informal")
+    private String informalAddress;
 
     @JsonProperty("website_url")
     private String websiteUrl;

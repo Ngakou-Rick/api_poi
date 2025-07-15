@@ -1,7 +1,6 @@
 package com.poi.yow_point.application.services.poiPlatformStat;
 
 import com.poi.yow_point.application.mappers.PoiPlatformStatMapper;
-import com.poi.yow_point.application.services.PoiPlatformStatService;
 import com.poi.yow_point.application.validation.PoiPlatformStatValidator;
 import com.poi.yow_point.infrastructure.entities.PoiPlatformStat;
 import com.poi.yow_point.infrastructure.repositories.poiPlatformStat.PoiPlatformStatRepository;

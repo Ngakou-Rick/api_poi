@@ -1,4 +1,4 @@
-package com.poi.yow_point.application.services;
+package com.poi.yow_point.application.services.poiAccessLog;
 
 import com.poi.yow_point.presentation.dto.PoiAccessLogDTO;
 import reactor.core.publisher.Flux;

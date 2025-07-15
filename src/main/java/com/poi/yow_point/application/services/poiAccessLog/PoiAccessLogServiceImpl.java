@@ -1,7 +1,7 @@
 package com.poi.yow_point.application.services.poiAccessLog;
 
+import com.poi.yow_point.application.mappers.MapperUtils;
 import com.poi.yow_point.application.mappers.PoiAccessLogMapper;
-import com.poi.yow_point.application.services.PoiAccessLogService;
 import com.poi.yow_point.application.validation.PoiAccessLogValidator;
 //import com.poi.yow_point.infrastructure.entities.PoiAccessLog;
 import com.poi.yow_point.infrastructure.repositories.poiAccessLog.PoiAccessLogRepository;
@@ -24,6 +24,7 @@ public class PoiAccessLogServiceImpl implements PoiAccessLogService {
 
     private final PoiAccessLogRepository repository;
     private final PoiAccessLogMapper mapper;
+    private final MapperUtils mapperUtils;
     private final PoiAccessLogValidator validator;
 
     @Override
@@ -31,24 +32,48 @@ public class PoiAccessLogServiceImpl implements PoiAccessLogService {
     public Mono<PoiAccessLogDTO> createAccessLog(PoiAccessLogDTO dto) {
         log.debug("Création d'un nouveau log d'accès pour POI: {}", dto.getPoiId());
         return validator.validate(dto)
-                .flatMap(mapper::toEntity)
-                .flatMap(entity -> {
+                .then(Mono.fromCallable(() -> mapper.toEntity(dto)))
+                .doOnNext(entity -> {
                     if (entity.getAccessId() == null)
                         entity.setAccessId(UUID.randomUUID());
                     if (entity.getAccessDatetime() == null)
                         entity.setAccessDatetime(OffsetDateTime.now());
-                    return repository.save(entity);
                 })
-                .flatMap(mapper::toDTO)
+                .flatMap(repository::save)
+                .map(mapper::toDto)
                 .doOnSuccess(result -> log.info("Log d'accès créé avec succès: {}", result.getAccessId()))
                 .doOnError(error -> log.error("Erreur lors de la création du log d'accès: {}", error.getMessage()));
+    }
+
+    @Override
+    @Transactional
+    public Mono<PoiAccessLogDTO> updateAccessLog(UUID accessId, PoiAccessLogDTO dto) {
+        log.debug("Mise à jour du log d'accès: {}", accessId);
+
+        return validator.validate(dto)
+                .then(repository.findById(accessId))
+                .switchIfEmpty(Mono.error(new RuntimeException("Log d'accès non trouvé: " + accessId)))
+                .map(existingEntity -> {
+                    if (dto.getPlatformType() != null)
+                        existingEntity.setPlatformType(dto.getPlatformType());
+                    if (dto.getAccessType() != null)
+                        existingEntity.setAccessType(dto.getAccessType());
+                    if (dto.getMetadata() != null)
+                        existingEntity.setMetadata(mapperUtils.mapToJsonNode(dto.getMetadata()));
+                    return existingEntity;
+                })
+                .flatMap(repository::save)
+                .map(mapper::toDto)
+                .doOnSuccess(result -> log.info("Log d'accès mis à jour: {}", accessId))
+                .doOnError(error -> log.error("Erreur lors de la mise à jour du log {}: {}", accessId,
+                        error.getMessage()));
     }
 
     @Override
     public Mono<PoiAccessLogDTO> getAccessLogById(UUID accessId) {
         log.debug("Recherche du log d'accès: {}", accessId);
         return repository.findById(accessId)
-                .flatMap(mapper::toDTO)
+                .map(mapper::toDto)
                 .doOnNext(result -> log.debug("Log d'accès trouvé: {}", accessId))
                 .switchIfEmpty(Mono.error(new RuntimeException("Log d'accès non trouvé: " + accessId)));
     }
@@ -56,62 +81,60 @@ public class PoiAccessLogServiceImpl implements PoiAccessLogService {
     @Override
     public Flux<PoiAccessLogDTO> getAllAccessLogs() {
         log.debug("Récupération de tous les logs d'accès");
-        return repository.findAll().flatMap(mapper::toDTO);
+        return repository.findAll().map(mapper::toDto);
     }
 
     @Override
     public Flux<PoiAccessLogDTO> getAccessLogsByPoiId(UUID poiId) {
         log.debug("Recherche des logs d'accès pour POI: {}", poiId);
-        return repository.findByPoiId(poiId).flatMap(mapper::toDTO);
+        return repository.findByPoiId(poiId).map(mapper::toDto);
     }
 
     @Override
     public Flux<PoiAccessLogDTO> getAccessLogsByOrganizationId(UUID organizationId) {
-        log.debug("Recherche des logs d'accès pour organisation: {}", organizationId);
-        return repository.findByOrganizationId(organizationId).flatMap(mapper::toDTO);
+        return repository.findByOrganizationId(organizationId).map(mapper::toDto);
     }
 
     @Override
     public Flux<PoiAccessLogDTO> getAccessLogsByUserId(UUID userId) {
-        log.debug("Recherche des logs d'accès pour utilisateur: {}", userId);
-        return repository.findByUserId(userId).flatMap(mapper::toDTO);
+        return repository.findByUserId(userId).map(mapper::toDto);
     }
 
     @Override
     public Flux<PoiAccessLogDTO> getAccessLogsByAccessType(String accessType) {
         log.debug("Recherche des logs d'accès pour type: {}", accessType);
-        return repository.findByAccessType(accessType).flatMap(mapper::toDTO);
+        return repository.findByAccessType(accessType).map(mapper::toDto);
     }
 
     @Override
     public Flux<PoiAccessLogDTO> getAccessLogsByPlatformType(String platformType) {
         log.debug("Recherche des logs d'accès pour plateforme: {}", platformType);
-        return repository.findByPlatformType(platformType).flatMap(mapper::toDTO);
+        return repository.findByPlatformType(platformType).map(mapper::toDto);
     }
 
     @Override
     public Flux<PoiAccessLogDTO> getAccessLogsByPoiAndOrganization(UUID poiId, UUID organizationId) {
         log.debug("Recherche des logs d'accès pour POI: {} et organisation: {}", poiId, organizationId);
-        return repository.findByPoiIdAndOrganizationId(poiId, organizationId).flatMap(mapper::toDTO);
+        return repository.findByPoiIdAndOrganizationId(poiId, organizationId).map(mapper::toDto);
     }
 
     @Override
     public Flux<PoiAccessLogDTO> getAccessLogsByDateRange(OffsetDateTime startDate, OffsetDateTime endDate) {
         log.debug("Recherche des logs d'accès entre {} et {}", startDate, endDate);
-        return repository.findByAccessDatetimeBetween(startDate, endDate).flatMap(mapper::toDTO);
+        return repository.findByAccessDatetimeBetween(startDate, endDate).map(mapper::toDto);
     }
 
     @Override
     public Flux<PoiAccessLogDTO> getRecentAccessLogsByPoiId(UUID poiId, OffsetDateTime since) {
         log.debug("Recherche des logs d'accès récents pour POI: {} depuis {}", poiId, since);
-        return repository.findRecentByPoiId(poiId, since).flatMap(mapper::toDTO);
+        return repository.findRecentByPoiId(poiId, since).map(mapper::toDto);
     }
 
     @Override
     public Flux<PoiAccessLogDTO> getAccessLogsByPoiIdWithPagination(UUID poiId, int page, int size) {
         int offset = page * size;
         log.debug("Recherche paginée des logs d'accès pour POI: {} (page: {}, taille: {})", poiId, page, size);
-        return repository.findByPoiIdWithPagination(poiId, size, offset).flatMap(mapper::toDTO);
+        return repository.findByPoiIdWithPagination(poiId, size, offset).map(mapper::toDto);
     }
 
     @Override
@@ -130,22 +153,6 @@ public class PoiAccessLogServiceImpl implements PoiAccessLogService {
     public Flux<Map<String, Object>> getPlatformStatsForOrganization(UUID organizationId) {
         log.debug("Récupération des statistiques par plateforme pour organisation: {}", organizationId);
         return repository.getPlatformStatsForOrganization(organizationId);
-    }
-
-    @Override
-    @Transactional
-    public Mono<PoiAccessLogDTO> updateAccessLog(UUID accessId, PoiAccessLogDTO dto) {
-        log.debug("Mise à jour du log d'accès: {}", accessId);
-
-        return validator.validate(dto) // Valider aussi les données de mise à jour
-                .then(repository.findById(accessId))
-                .switchIfEmpty(Mono.error(new RuntimeException("Log d'accès non trouvé: " + accessId)))
-                .flatMap(existingEntity -> mapper.updateEntityFromDTO(existingEntity, dto))
-                .flatMap(repository::save)
-                .flatMap(mapper::toDTO)
-                .doOnSuccess(result -> log.info("Log d'accès mis à jour: {}", accessId))
-                .doOnError(error -> log.error("Erreur lors de la mise à jour du log {}: {}", accessId,
-                        error.getMessage()));
     }
 
     @Override

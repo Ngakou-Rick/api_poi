@@ -1,4 +1,4 @@
-package com.poi.yow_point.application.services;
+package com.poi.yow_point.application.services.poiPlatformStat;
 
 import com.poi.yow_point.presentation.dto.PoiPlatformStatDTO;
 import reactor.core.publisher.Flux;

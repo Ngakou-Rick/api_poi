@@ -69,17 +69,20 @@ public class PointOfInterest {
     @Column("address_country")
     private String addressCountry;
 
-    @Column("phone_number")
-    private String phoneNumber;
+    @Column("address_state_province")
+    private String stateProvince;
+
+    @Column("address_informal")
+    private String informalAddress;
 
     @Column("website_url")
     private String websiteUrl;
 
     @Column("operation_time_plan")
-    private Json operationTimePlanJson;
+    private Json operationTimePlan;
 
     @Column("poi_contacts")
-    private Json poiContactsJson;
+    private Json poiContacts;
 
     @Column("poi_images_urls")
     private String poiImagesUrls;
@@ -125,14 +128,16 @@ public class PointOfInterest {
         this.poiAmenities = amenities != null ? String.join(",", amenities) : null;
     }
 
+    // ...
     public List<String> getPoiKeywordsList() {
-        if (poiImagesUrls == null || poiImagesUrls.trim().isEmpty()) {
+        if (poiKeywords == null || poiKeywords.trim().isEmpty()) { // CORRIGÉ
             return new ArrayList<>();
         }
-        return Arrays.asList(poiImagesUrls.split(","));
+        return Arrays.asList(poiKeywords.split(",")); // CORRIGÉ
     }
 
-    public void setPoiKeywordsList(List<String> urls) {
-        this.poiImagesUrls = urls != null ? String.join(",", urls) : null;
+    public void setPoiKeywordsList(List<String> keywords) { // CORRIGÉ
+        this.poiKeywords = keywords != null ? String.join(",", keywords) : null;
     }
+    // ...
 }

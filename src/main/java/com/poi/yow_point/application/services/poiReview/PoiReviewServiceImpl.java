@@ -1,7 +1,6 @@
 package com.poi.yow_point.application.services.poiReview;
 
 import com.poi.yow_point.application.mappers.PoiReviewMapper;
-import com.poi.yow_point.application.services.PoiReviewService;
 import com.poi.yow_point.application.services.websocket.PoiEventPublisher;
 import com.poi.yow_point.infrastructure.entities.PoiReview;
 import com.poi.yow_point.infrastructure.repositories.poiReview.PoiReviewRepository;

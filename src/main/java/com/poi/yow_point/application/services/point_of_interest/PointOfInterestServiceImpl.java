@@ -1,7 +1,7 @@
 package com.poi.yow_point.application.services.point_of_interest;
 
+import com.poi.yow_point.application.mappers.MapperUtils;
 import com.poi.yow_point.application.mappers.PointOfInterestMapper;
-import com.poi.yow_point.application.services.PointOfInterestService;
 import com.poi.yow_point.application.services.websocket.PoiEventPublisher;
 import com.poi.yow_point.application.validation.PointOfInterestValidator;
 import com.poi.yow_point.infrastructure.entities.PointOfInterest;
@@ -28,6 +28,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
 
     private final PointOfInterestRepository repository;
     private final PointOfInterestMapper mapper;
+    private final MapperUtils mapperUtils;
     private final PointOfInterestValidator validator;
     private final PoiEventPublisher eventPublisher;
 
@@ -38,7 +39,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                 .flatMap(validatedDto -> repository.existsByNameAndOrganizationIdExcludingId(
                         validatedDto.getPoiName(),
                         validatedDto.getOrganizationId(),
-                        UUID.randomUUID())
+                        null)
                         .flatMap(exists -> {
                             if (exists) {
                                 return Mono.error(new IllegalArgumentException(
@@ -46,7 +47,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                             }
                             return Mono.just(validatedDto);
                         }))
-                .map(mapper::toEntity)
+                .map(validatedDto -> mapper.toEntity(validatedDto, mapperUtils))
                 .doOnNext(entity -> {
                     Instant now = Instant.now();
                     entity.setCreatedAt(now);
@@ -89,9 +90,8 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                     return Mono.just(existingEntity);
                 })
                 .map(existingEntity -> {
-                    PointOfInterest updatedEntity = mapper.updateEntityFromDto(existingEntity, dto);
-                    updatedEntity.setUpdatedAt(Instant.now());
-                    return updatedEntity;
+                    mapper.updateEntityFromDto(existingEntity, dto, mapperUtils);
+                    return existingEntity;
                 })
                 .flatMap(repository::save)
                 .map(mapper::toDto)

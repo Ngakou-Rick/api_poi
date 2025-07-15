@@ -1,4 +1,4 @@
-package com.poi.yow_point.application.services;
+package com.poi.yow_point.application.services.poiReview;
 
 import com.poi.yow_point.presentation.dto.PoiReviewDTO;
 import reactor.core.publisher.Flux;

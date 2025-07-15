@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import com.poi.yow_point.application.services.PoiPlatformStatService;
+import com.poi.yow_point.application.services.poiPlatformStat.PoiPlatformStatService;
 import com.poi.yow_point.presentation.dto.PoiPlatformStatDTO;
 
-import jakarta.validation.Valid;
+//import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/poi-platform-stats")
+@RequestMapping("/api/poi-platform-stats")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 @Tag(name = "POI Platform Statistics", description = "API for managing Point of Interest platform statistics")
@@ -40,7 +40,7 @@ public class PoiPlatformStatController {
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
         @PostMapping
-        public Mono<ResponseEntity<PoiPlatformStatDTO>> createStat(@Valid @RequestBody PoiPlatformStatDTO statDTO) {
+        public Mono<ResponseEntity<PoiPlatformStatDTO>> createStat(@RequestBody PoiPlatformStatDTO statDTO) {
                 return service.createStat(statDTO)
                                 .map(createdStat -> ResponseEntity.status(HttpStatus.CREATED).body(createdStat))
                                 .onErrorResume(IllegalArgumentException.class,
@@ -59,10 +59,10 @@ public class PoiPlatformStatController {
                         @ApiResponse(responseCode = "404", description = "Statistic not found"),
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
-        @PutMapping("/{statId}")
+        @PutMapping("/{stat_id}")
         public Mono<ResponseEntity<PoiPlatformStatDTO>> updateStat(
-                        @Parameter(description = "ID of the statistic to be updated", required = true) @PathVariable UUID statId,
-                        @Valid @RequestBody PoiPlatformStatDTO statDTO) {
+                        @Parameter(description = "ID of the statistic to be updated", required = true) @PathVariable("stat_id") UUID statId,
+                        @RequestBody PoiPlatformStatDTO statDTO) {
                 return service.updateStat(statId, statDTO)
                                 .map(ResponseEntity::ok)
                                 .onErrorResume(IllegalArgumentException.class,
@@ -90,9 +90,9 @@ public class PoiPlatformStatController {
                         @ApiResponse(responseCode = "200", description = "Statistic found", content = @Content(schema = @Schema(implementation = PoiPlatformStatDTO.class))),
                         @ApiResponse(responseCode = "404", description = "Statistic not found")
         })
-        @GetMapping("/{statId}")
+        @GetMapping("/{stat_id}")
         public Mono<ResponseEntity<PoiPlatformStatDTO>> getStatById(
-                        @Parameter(description = "ID of the statistic to be retrieved", required = true) @PathVariable UUID statId) {
+                        @Parameter(description = "ID of the statistic to be retrieved", required = true) @PathVariable("stat_id") UUID statId) {
                 return service.getStatById(statId)
                                 .map(stat -> ResponseEntity.ok(stat))
                                 .defaultIfEmpty(ResponseEntity.notFound().build())
@@ -102,9 +102,9 @@ public class PoiPlatformStatController {
 
         @Operation(summary = "Get statistics by organization", description = "Retrieves all statistics for a specific organization")
         @ApiResponse(responseCode = "200", description = "Successfully retrieved statistics", content = @Content(schema = @Schema(implementation = PoiPlatformStatDTO.class)))
-        @GetMapping("/organization/{orgId}")
+        @GetMapping("/organization/{org_id}/stats")
         public Flux<PoiPlatformStatDTO> getStatsByOrgId(
-                        @Parameter(description = "Organization ID to filter statistics", required = true) @PathVariable UUID orgId) {
+                        @Parameter(description = "Organization ID to filter statistics", required = true) @PathVariable("org_id") UUID orgId) {
                 return service.getStatsByOrgId(orgId)
                                 .doOnComplete(() -> log.info("Récupération des statistiques pour l'organisation: {}",
                                                 orgId));
@@ -112,18 +112,18 @@ public class PoiPlatformStatController {
 
         @Operation(summary = "Get statistics by POI", description = "Retrieves all statistics for a specific point of interest")
         @ApiResponse(responseCode = "200", description = "Successfully retrieved statistics", content = @Content(schema = @Schema(implementation = PoiPlatformStatDTO.class)))
-        @GetMapping("/poi/{poiId}")
+        @GetMapping("/poi/{poi_id}/stats")
         public Flux<PoiPlatformStatDTO> getStatsByPoiId(
-                        @Parameter(description = "POI ID to filter statistics", required = true) @PathVariable UUID poiId) {
+                        @Parameter(description = "POI ID to filter statistics", required = true) @PathVariable("poi_id") UUID poiId) {
                 return service.getStatsByPoiId(poiId)
                                 .doOnComplete(() -> log.info("Récupération des statistiques pour le POI: {}", poiId));
         }
 
         @Operation(summary = "Get statistics by platform type", description = "Retrieves all statistics for a specific platform type")
         @ApiResponse(responseCode = "200", description = "Successfully retrieved statistics", content = @Content(schema = @Schema(implementation = PoiPlatformStatDTO.class)))
-        @GetMapping("/platform/{platformType}")
+        @GetMapping("/platform/{platform_type}/stats")
         public Flux<PoiPlatformStatDTO> getStatsByPlatformType(
-                        @Parameter(description = "Platform type to filter statistics", required = true) @PathVariable String platformType) {
+                        @Parameter(description = "Platform type to filter statistics", required = true) @PathVariable("platform_type") String platformType) {
                 return service.getStatsByPlatformType(platformType)
                                 .doOnComplete(() -> log.info("Récupération des statistiques pour la plateforme: {}",
                                                 platformType));
@@ -131,7 +131,7 @@ public class PoiPlatformStatController {
 
         @Operation(summary = "Get statistics by date", description = "Retrieves all statistics for a specific date")
         @ApiResponse(responseCode = "200", description = "Successfully retrieved statistics", content = @Content(schema = @Schema(implementation = PoiPlatformStatDTO.class)))
-        @GetMapping("/date/{date}")
+        @GetMapping("/date/{date}/stats")
         public Flux<PoiPlatformStatDTO> getStatsByDate(
                         @Parameter(description = "Date to filter statistics (format: yyyy-MM-dd)", required = true) @PathVariable LocalDate date) {
                 return service.getStatsByDate(date)
@@ -151,9 +151,9 @@ public class PoiPlatformStatController {
 
         @Operation(summary = "Get statistics by organization and date range", description = "Retrieves all statistics for a specific organization between two dates")
         @ApiResponse(responseCode = "200", description = "Successfully retrieved statistics", content = @Content(schema = @Schema(implementation = PoiPlatformStatDTO.class)))
-        @GetMapping("/organization/{orgId}/date-range")
+        @GetMapping("/organization/{org_id}/date-range")
         public Flux<PoiPlatformStatDTO> getStatsByOrgIdAndDateRange(
-                        @Parameter(description = "Organization ID to filter statistics", required = true) @PathVariable UUID orgId,
+                        @Parameter(description = "Organization ID to filter statistics", required = true) @PathVariable("org_id") UUID orgId,
                         @Parameter(description = "Start date of the range (format: yyyy-MM-dd)", required = true) @RequestParam LocalDate startDate,
                         @Parameter(description = "End date of the range (format: yyyy-MM-dd)", required = true) @RequestParam LocalDate endDate) {
                 return service.getStatsByOrgIdAndDateRange(orgId, startDate, endDate)
@@ -168,9 +168,9 @@ public class PoiPlatformStatController {
                         @ApiResponse(responseCode = "404", description = "Statistic not found"),
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
-        @DeleteMapping("/{statId}")
+        @DeleteMapping("/{stat_id}")
         public Mono<ResponseEntity<Void>> deleteStat(
-                        @Parameter(description = "ID of the statistic to be deleted", required = true) @PathVariable UUID statId) {
+                        @Parameter(description = "ID of the statistic to be deleted", required = true) @PathVariable("stat_id") UUID statId) {
                 return service.deleteStat(statId)
                                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                                 .onErrorResume(error -> {
@@ -190,9 +190,9 @@ public class PoiPlatformStatController {
                         @ApiResponse(responseCode = "204", description = "Statistics deleted successfully"),
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
-        @DeleteMapping("/organization/{orgId}")
+        @DeleteMapping("/organization/{org_id}")
         public Mono<ResponseEntity<Void>> deleteStatsByOrgId(
-                        @Parameter(description = "Organization ID for which to delete statistics", required = true) @PathVariable UUID orgId) {
+                        @Parameter(description = "Organization ID for which to delete statistics", required = true) @PathVariable("org_id") UUID orgId) {
                 return service.deleteStatsByOrgId(orgId)
                                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                                 .onErrorResume(error -> {
@@ -211,9 +211,9 @@ public class PoiPlatformStatController {
                         @ApiResponse(responseCode = "204", description = "Statistics deleted successfully"),
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
-        @DeleteMapping("/poi/{poiId}")
+        @DeleteMapping("/poi/{poi_id}")
         public Mono<ResponseEntity<Void>> deleteStatsByPoiId(
-                        @Parameter(description = "POI ID for which to delete statistics", required = true) @PathVariable UUID poiId) {
+                        @Parameter(description = "POI ID for which to delete statistics", required = true) @PathVariable("poi_id") UUID poiId) {
                 return service.deleteStatsByPoiId(poiId)
                                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                                 .onErrorResume(error -> {
@@ -225,28 +225,5 @@ public class PoiPlatformStatController {
                                 .doOnSuccess(response -> log.info(
                                                 "Suppression des statistiques pour le POI: {} - Status: {}",
                                                 poiId, response.getStatusCode()));
-        }
-
-        @Operation(summary = "Check if statistic exists", description = "Checks if a statistic exists by its ID")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Check performed successfully", content = @Content(schema = @Schema(implementation = Boolean.class)))
-        })
-        @GetMapping("/{statId}/exists")
-        public Mono<ResponseEntity<Boolean>> existsById(
-                        @Parameter(description = "ID of the statistic to check", required = true) @PathVariable UUID statId) {
-                return service.existsById(statId)
-                                .map(exists -> ResponseEntity.ok(exists))
-                                .doOnSuccess(response -> log.debug("Vérification d'existence pour la statistique: {}",
-                                                statId));
-        }
-
-        @Operation(summary = "Count all statistics", description = "Returns the total count of statistics")
-        @ApiResponse(responseCode = "200", description = "Count retrieved successfully", content = @Content(schema = @Schema(implementation = Long.class)))
-        @GetMapping("/count")
-        public Mono<ResponseEntity<Long>> countAll() {
-                return service.countAll()
-                                .map(count -> ResponseEntity.ok(count))
-                                .doOnSuccess(response -> log.debug("Comptage total des statistiques: {}",
-                                                response.getBody()));
         }
 }

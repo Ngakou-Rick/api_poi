@@ -1,4 +1,4 @@
-package com.poi.yow_point.application.services;
+package com.poi.yow_point.application.services.point_of_interest;
 
 import com.poi.yow_point.presentation.dto.PointOfInterestDTO;
 

@@ -44,7 +44,7 @@ public class PodcastController {
         return podcastService.createPodcast(podcastCreateDto);
     }
 
-    @PutMapping("/{podcastId}")
+    @PutMapping("/{podcast_id}")
     @Operation(summary = "Update an existing podcast", description = "Updates the details of an existing podcast by its ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Podcast updated successfully", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PodcastDTO.class))),
@@ -52,22 +52,22 @@ public class PodcastController {
             @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content)
     })
     public Mono<PodcastDTO> updatePodcast(
-            @Parameter(description = "ID of the podcast to update", required = true) @PathVariable UUID podcastId,
+            @Parameter(description = "ID of the podcast to update", required = true) @PathVariable UUID podcast_id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated data for the podcast", required = true, content = @Content(schema = @Schema(implementation = UpdatePodcastRequest.class))) @RequestBody UpdatePodcastRequest podcastUpdateDto) {
-        log.info("REST request to update podcast: {}", podcastId);
-        return podcastService.updatePodcast(podcastId, podcastUpdateDto);
+        log.info("REST request to update podcast: {}", podcast_id);
+        return podcastService.updatePodcast(podcast_id, podcastUpdateDto);
     }
 
-    @GetMapping("/{podcastId}")
+    @GetMapping("/{podcast_id}")
     @Operation(summary = "Get a podcast by ID", description = "Retrieves a single podcast by its unique identifier.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Podcast found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PodcastDTO.class))),
             @ApiResponse(responseCode = "404", description = "Podcast not found", content = @Content)
     })
     public Mono<PodcastDTO> getPodcastById(
-            @Parameter(description = "Unique ID of the podcast", required = true) @PathVariable UUID podcastId) {
-        log.debug("REST request to get podcast by ID: {}", podcastId);
-        return podcastService.getPodcastById(podcastId);
+            @Parameter(description = "Unique ID of the podcast", required = true) @PathVariable UUID podcast_id) {
+        log.debug("REST request to get podcast by ID: {}", podcast_id);
+        return podcastService.getPodcastById(podcast_id);
     }
 
     @GetMapping
@@ -78,20 +78,20 @@ public class PodcastController {
         return podcastService.getAllPodcasts();
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user/{user_id}")
     @Operation(summary = "Get podcasts by user ID", description = "Retrieves all podcasts created by a specific user.")
     @ApiResponse(responseCode = "200", description = "List of podcasts for the user", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PodcastDTO.class)))
     public Flux<PodcastDTO> getPodcastsByUserId(
-            @Parameter(description = "ID of the user who created the podcasts", required = true) @PathVariable UUID userId) {
-        log.debug("REST request to get podcasts for user: {}", userId);
-        return podcastService.getPodcastsByUserId(userId);
+            @Parameter(description = "ID of the user who created the podcasts", required = true) @PathVariable UUID user_id) {
+        log.debug("REST request to get podcasts for user: {}", user_id);
+        return podcastService.getPodcastsByUserId(user_id);
     }
 
-    @GetMapping("/poi/{poiId}")
+    @GetMapping("/poi/{poi_id}")
     @Operation(summary = "Get podcasts by POI ID", description = "Retrieves all podcasts associated with a specific Point of Interest.")
     @ApiResponse(responseCode = "200", description = "List of podcasts for the POI", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PodcastDTO.class)))
     public Flux<PodcastDTO> getPodcastsByPoiId(
-            @Parameter(description = "ID of the Point of Interest the podcasts are associated with", required = true) @PathVariable UUID poiId) {
+            @Parameter(description = "ID of the Point of Interest the podcasts are associated with", required = true) @PathVariable("poi_id") UUID poiId) {
         log.debug("REST request to get podcasts for POI: {}", poiId);
         return podcastService.getPodcastsByPoiId(poiId);
     }
@@ -115,7 +115,7 @@ public class PodcastController {
         return podcastService.getPodcastsByDurationRange(minDuration, maxDuration);
     }
 
-    @DeleteMapping("/{podcastId}")
+    @DeleteMapping("/{podcast_id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a podcast", description = "Permanently deletes a podcast by its ID.")
     @ApiResponses(value = {
@@ -123,26 +123,42 @@ public class PodcastController {
             @ApiResponse(responseCode = "404", description = "Podcast not found", content = @Content)
     })
     public Mono<Void> deletePodcast(
-            @Parameter(description = "ID of the podcast to delete", required = true) @PathVariable UUID podcastId) {
+            @Parameter(description = "ID of the podcast to delete", required = true) @PathVariable("podcast_id") UUID podcastId) {
         log.info("REST request to delete podcast: {}", podcastId);
         return podcastService.deletePodcast(podcastId);
     }
 
-    @GetMapping("/count/user/{userId}")
-    @Operation(summary = "Count podcasts by user", description = "Gets the total number of podcasts created by a specific user.")
-    @ApiResponse(responseCode = "200", description = "Total number of podcasts for the user", content = @Content(schema = @Schema(implementation = Long.class, example = "5")))
-    public Mono<Long> countPodcastsByUserId(
-            @Parameter(description = "ID of the user", required = true) @PathVariable UUID userId) {
-        log.debug("REST request to count podcasts for user: {}", userId);
-        return podcastService.countPodcastsByUserId(userId);
-    }
-
-    @GetMapping("/count/poi/{poiId}")
-    @Operation(summary = "Count podcasts by POI", description = "Gets the total number of podcasts associated with a specific POI.")
-    @ApiResponse(responseCode = "200", description = "Total number of podcasts for the POI", content = @Content(schema = @Schema(implementation = Long.class, example = "12")))
-    public Mono<Long> countPodcastsByPoiId(
-            @Parameter(description = "ID of the POI", required = true) @PathVariable UUID poiId) {
-        log.debug("REST request to count podcasts for POI: {}", poiId);
-        return podcastService.countPodcastsByPoiId(poiId);
-    }
+    /*
+     * @GetMapping("/count/user/{user_id}")
+     * 
+     * @Operation(summary = "Count podcasts by user", description =
+     * "Gets the total number of podcasts created by a specific user.")
+     * 
+     * @ApiResponse(responseCode = "200", description =
+     * "Total number of podcasts for the user", content = @Content(schema
+     * = @Schema(implementation = Long.class, example = "5")))
+     * public Mono<Long> countPodcastsByUserId(
+     * 
+     * @Parameter(description = "ID of the user", required = true) @PathVariable
+     * UUID userId) {
+     * log.debug("REST request to count podcasts for user: {}", userId);
+     * return podcastService.countPodcastsByUserId(userId);
+     * }
+     * 
+     * @GetMapping("/count/poi/{poi_id}")
+     * 
+     * @Operation(summary = "Count podcasts by POI", description =
+     * "Gets the total number of podcasts associated with a specific POI.")
+     * 
+     * @ApiResponse(responseCode = "200", description =
+     * "Total number of podcasts for the POI", content = @Content(schema
+     * = @Schema(implementation = Long.class, example = "12")))
+     * public Mono<Long> countPodcastsByPoiId(
+     * 
+     * @Parameter(description = "ID of the POI", required = true) @PathVariable UUID
+     * poiId) {
+     * log.debug("REST request to count podcasts for POI: {}", poiId);
+     * return podcastService.countPodcastsByPoiId(poiId);
+     * }
+     */
 }

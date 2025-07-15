@@ -1,7 +1,6 @@
 package com.poi.yow_point.application.services.organization;
 
 import com.poi.yow_point.application.mappers.OrganizationMapper;
-import com.poi.yow_point.application.services.OrganizationService;
 //import com.poi.yow_point.application.validation.OrganizationValidator;
 import com.poi.yow_point.infrastructure.repositories.organization.OrganizationRepository;
 import com.poi.yow_point.presentation.dto.OrganizationDTO;

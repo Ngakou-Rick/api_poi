@@ -27,7 +27,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Email;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/users")
 @Tag(name = "User API", description = "APIs for managing application users")
 @Validated
 public class AppUserController {
@@ -196,10 +196,10 @@ public class AppUserController {
         }
 
         // Nouveaux endpoints pour les fonctionnalités étendues
-        @GetMapping("/organization/{orgId}/active")
+        @GetMapping("/organization/{org_id}/active")
         @Operation(summary = "Get active users by organization")
         @ApiResponse(responseCode = "200", description = "Successfully retrieved active users for organization")
-        public Flux<AppUserDTO> getActiveUsersByOrganization(@PathVariable UUID orgId) {
+        public Flux<AppUserDTO> getActiveUsersByOrganization(@PathVariable("org_id") UUID orgId) {
                 log.info("Received request to get active users for organization: {}", orgId);
                 return appUserService.getActiveUsersByOrganization(orgId)
                                 .doOnComplete(() -> log.info("Completed fetching active users for organization: {}",
@@ -215,10 +215,10 @@ public class AppUserController {
                                 .doOnComplete(() -> log.info("Completed fetching users with role: {}", role));
         }
 
-        @GetMapping("/organization/{orgId}/count")
+        @GetMapping("/organization/{org_id}/count")
         @Operation(summary = "Count active users in organization")
         @ApiResponse(responseCode = "200", description = "Returns count of active users in organization")
-        public Mono<ResponseEntity<Long>> countActiveUsersByOrganization(@PathVariable UUID orgId) {
+        public Mono<ResponseEntity<Long>> countActiveUsersByOrganization(@PathVariable("org_id") UUID orgId) {
                 return appUserService.countActiveUsersByOrganization(orgId)
                                 .map(ResponseEntity::ok);
         }

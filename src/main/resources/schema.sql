@@ -54,7 +54,6 @@ CREATE TABLE IF NOT EXISTS point_of_interest (
     address_country TEXT,
     address_informal TEXT,
 
-    phone_number TEXT,
     website_url TEXT,
 
     -- JSON au lieu de JSONB pour meilleure compatibilité
@@ -155,7 +154,6 @@ CREATE INDEX IF NOT EXISTS idx_poi_type ON point_of_interest (poi_type);
 CREATE INDEX IF NOT EXISTS idx_poi_category ON point_of_interest (poi_category);
 CREATE INDEX IF NOT EXISTS idx_poi_name ON point_of_interest (poi_name);
 CREATE INDEX IF NOT EXISTS idx_poi_is_active ON point_of_interest (is_active);
-CREATE INDEX IF NOT EXISTS idx_poi_phone_number ON point_of_interest (phone_number);
 
 CREATE INDEX IF NOT EXISTS idx_access_log_poi ON poi_access_log (poi_id);
 CREATE INDEX IF NOT EXISTS idx_access_log_org ON poi_access_log (organization_id);

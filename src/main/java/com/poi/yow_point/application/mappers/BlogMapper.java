@@ -7,9 +7,6 @@ import com.poi.yow_point.presentation.dto.blogDto.BlogDTO;
 import com.poi.yow_point.presentation.dto.blogDto.CreateBlogRequest;
 import com.poi.yow_point.presentation.dto.blogDto.UpdateBlogRequest;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BlogMapper {
 
