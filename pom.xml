@@ -158,6 +158,18 @@
     		<version>2.5.0</version>
 		</dependency>
 
+		<!-- Spring Boot Starter for Apache Kafka -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+
+		<!-- Spring Boot Starter for Elasticsearch -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>

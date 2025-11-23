@@ -2,8 +2,10 @@ package com.poi.yow_point.application.services.point_of_interest;
 
 import com.poi.yow_point.application.mappers.MapperUtils;
 import com.poi.yow_point.application.mappers.PointOfInterestMapper;
+import com.poi.yow_point.application.services.kafka.PoiKafkaProducer;
 import com.poi.yow_point.application.services.websocket.PoiEventPublisher;
 import com.poi.yow_point.application.validation.PointOfInterestValidator;
+import com.poi.yow_point.infrastructure.elasticsearch.repository.PoiDocumentRepository;
 import com.poi.yow_point.infrastructure.entities.PointOfInterest;
 import com.poi.yow_point.infrastructure.repositories.PointOfInterest.PointOfInterestRepository;
 import com.poi.yow_point.presentation.dto.PointOfInterestDTO;
@@ -31,6 +33,8 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     private final MapperUtils mapperUtils;
     private final PointOfInterestValidator validator;
     private final PoiEventPublisher eventPublisher;
+    private final PoiKafkaProducer kafkaProducer;
+    private final PoiDocumentRepository elasticsearchRepository;
 
     @Override
     @Transactional
@@ -63,6 +67,8 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                     log.info("POI created successfully with ID: {}. Publishing WebSocket event...",
                             savedDto.getPoiId());
                     eventPublisher.publishEvent(new PoiEvent(PoiEvent.EventType.POI_CREATED, savedDto));
+                    kafkaProducer.sendPoiEvent(new com.poi.yow_point.presentation.dto.event.PoiEvent(
+                            com.poi.yow_point.presentation.dto.event.PoiEvent.EventType.CREATED, savedDto));
                 })
                 .doOnError(error -> log.error("Error creating POI: {}", error.getMessage()));
     }
@@ -99,6 +105,8 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                     log.info("POI updated successfully: {},  Publishing WebSocket event...",
                             updatedDto.getPoiId());
                     eventPublisher.publishEvent(new PoiEvent(PoiEvent.EventType.POI_UPDATED, updatedDto));
+                    kafkaProducer.sendPoiEvent(new com.poi.yow_point.presentation.dto.event.PoiEvent(
+                            com.poi.yow_point.presentation.dto.event.PoiEvent.EventType.UPDATED, updatedDto));
                 })
                 .doOnError(error -> log.error("Error updating POI {}: {}", poiId, error.getMessage()));
     }
@@ -132,7 +140,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     @Override
     public Flux<PointOfInterestDTO> findByLocationWithinRadius(Double latitude, Double longitude,
             Double radiusKm) {
-        return repository.findByLocationWithinRadius(latitude, longitude, radiusKm)
+        return elasticsearchRepository.findByLocationNear(new org.springframework.data.elasticsearch.core.geo.GeoPoint(latitude, longitude), radiusKm + "km")
                 .map(mapper::toDto)
                 .doOnComplete(() -> log.debug("Location search completed"))
                 .doOnError(error -> log.error("Error in location search: {}", error.getMessage()));
@@ -140,7 +148,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
 
     @Override
     public Flux<PointOfInterestDTO> findByType(String poiType) {
-        return repository.findByPoiType(poiType)
+        return elasticsearchRepository.findByPoiType(poiType)
                 .map(mapper::toDto)
                 .doOnComplete(() -> log.debug("Retrieved POIs by type: {}", poiType))
                 .doOnError(error -> log.error("Error retrieving POIs by type {}: {}", poiType, error.getMessage()));
@@ -148,7 +156,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
 
     @Override
     public Flux<PointOfInterestDTO> findByCategory(String poiCategory) {
-        return repository.findByPoiCategory(poiCategory)
+        return elasticsearchRepository.findByPoiCategory(poiCategory)
                 .map(mapper::toDto)
                 .doOnComplete(() -> log.debug("Retrieved POIs by category: {}", poiCategory))
                 .doOnError(error -> log.error("Error retrieving POIs by category {}: {}",
@@ -157,7 +165,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
 
     @Override
     public Flux<PointOfInterestDTO> searchByName(String name) {
-        return repository.findByPoiNameContainingIgnoreCase(name)
+        return elasticsearchRepository.findByPoiNameContainingIgnoreCase(name)
                 .map(mapper::toDto)
                 .doOnComplete(() -> log.debug("Name search completed for: {}", name))
                 .doOnError(error -> log.error("Error in name search for {}: {}", name, error.getMessage()));
@@ -165,7 +173,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
 
     @Override
     public Flux<PointOfInterestDTO> findByCity(String city) {
-        return repository.findByAddressCity(city)
+        return elasticsearchRepository.findByAddressCity(city)
                 .map(mapper::toDto)
                 .doOnComplete(() -> log.debug("Retrieved POIs for city: {}", city))
                 .doOnError(error -> log.error("Error retrieving POIs for city {}: {}",
@@ -174,7 +182,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
 
     @Override
     public Flux<PointOfInterestDTO> findTopPopular(Integer limit) {
-        return repository.findTopByPopularityScore(limit)
+        return elasticsearchRepository.findTopByOrderByPopularityScoreDesc(limit)
                 .map(mapper::toDto)
                 .doOnComplete(() -> log.debug("Retrieved top {} popular POIs", limit))
                 .doOnError(error -> log.error("Error retrieving top popular POIs: {}", error.getMessage()));
@@ -229,12 +237,18 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     public Mono<Void> deletePoi(UUID poiId) {
         return repository.findById(poiId)
                 .switchIfEmpty(Mono.error(new RuntimeException("POI not found with ID: " + poiId)))
-                .flatMap(poi -> repository.deleteById(poiId))
-                .doOnSuccess(unused -> {
-                    log.info("POI {} deleted successfully.  Publishing WebSocket event...", poiId);
-                    eventPublisher.publishEvent(new PoiEvent(PoiEvent.EventType.POI_DELETED, null));
+                .flatMap(poiEntity -> {
+                    PointOfInterestDTO dto = mapper.toDto(poiEntity);
+                    return repository.deleteById(poiId).then(Mono.just(dto));
                 })
-                .doOnError(error -> log.error("Error deleting POI {}: {}", poiId, error.getMessage()));
+                .doOnSuccess(deletedDto -> {
+                    log.info("POI {} deleted successfully. Publishing WebSocket and Kafka events...", poiId);
+                    eventPublisher.publishEvent(new PoiEvent(PoiEvent.EventType.POI_DELETED, deletedDto));
+                    kafkaProducer.sendPoiEvent(new com.poi.yow_point.presentation.dto.event.PoiEvent(
+                            com.poi.yow_point.presentation.dto.event.PoiEvent.EventType.DELETED, deletedDto));
+                })
+                .doOnError(error -> log.error("Error deleting POI {}: {}", poiId, error.getMessage()))
+                .then();
     }
 
     @Override
