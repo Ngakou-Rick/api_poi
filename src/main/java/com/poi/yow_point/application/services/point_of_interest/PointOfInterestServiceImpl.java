@@ -4,8 +4,7 @@ import com.poi.yow_point.application.mappers.MapperUtils;
 import com.poi.yow_point.application.mappers.PointOfInterestMapper;
 import com.poi.yow_point.application.services.websocket.PoiEventPublisher;
 import com.poi.yow_point.application.validation.PointOfInterestValidator;
-import com.poi.yow_point.infrastructure.entities.PointOfInterest;
-import com.poi.yow_point.infrastructure.repositories.PointOfInterest.PointOfInterestRepository;
+import com.poi.yow_point.infrastructure.kafka.KafkaProducerService;
 import com.poi.yow_point.presentation.dto.PointOfInterestDTO;
 import com.poi.yow_point.presentation.dto.websocketDTO.PoiEvent;
 
@@ -26,11 +25,12 @@ import java.util.UUID;
 @Slf4j
 public class PointOfInterestServiceImpl implements PointOfInterestService {
 
-    private final PointOfInterestRepository repository;
+    private final com.poi.yow_point.infrastructure.repositories.PointOfInterest.PointOfInterestRepository repository;
     private final PointOfInterestMapper mapper;
     private final MapperUtils mapperUtils;
     private final PointOfInterestValidator validator;
     private final PoiEventPublisher eventPublisher;
+    private final KafkaProducerService kafkaProducerService;
 
     @Override
     @Transactional
@@ -63,6 +63,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                     log.info("POI created successfully with ID: {}. Publishing WebSocket event...",
                             savedDto.getPoiId());
                     eventPublisher.publishEvent(new PoiEvent(PoiEvent.EventType.POI_CREATED, savedDto));
+                    kafkaProducerService.sendMessage("poi-created", savedDto);
                 })
                 .doOnError(error -> log.error("Error creating POI: {}", error.getMessage()));
     }
@@ -99,6 +100,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                     log.info("POI updated successfully: {},  Publishing WebSocket event...",
                             updatedDto.getPoiId());
                     eventPublisher.publishEvent(new PoiEvent(PoiEvent.EventType.POI_UPDATED, updatedDto));
+                    kafkaProducerService.sendMessage("poi-updated", updatedDto);
                 })
                 .doOnError(error -> log.error("Error updating POI {}: {}", poiId, error.getMessage()));
     }
@@ -229,12 +231,14 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     public Mono<Void> deletePoi(UUID poiId) {
         return repository.findById(poiId)
                 .switchIfEmpty(Mono.error(new RuntimeException("POI not found with ID: " + poiId)))
-                .flatMap(poi -> repository.deleteById(poiId))
-                .doOnSuccess(unused -> {
-                    log.info("POI {} deleted successfully.  Publishing WebSocket event...", poiId);
+                .flatMap(poi -> repository.deleteById(poiId).thenReturn(poi))
+                .doOnSuccess(poi -> {
+                    log.info("POI {} deleted successfully. Publishing WebSocket event...", poiId);
                     eventPublisher.publishEvent(new PoiEvent(PoiEvent.EventType.POI_DELETED, null));
+                    kafkaProducerService.sendMessage("poi-deleted", mapper.toDto(poi));
                 })
-                .doOnError(error -> log.error("Error deleting POI {}: {}", poiId, error.getMessage()));
+                .doOnError(error -> log.error("Error deleting POI {}: {}", poiId, error.getMessage()))
+                .then();
     }
 
     @Override

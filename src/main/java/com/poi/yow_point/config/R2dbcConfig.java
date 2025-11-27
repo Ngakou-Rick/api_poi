@@ -8,6 +8,7 @@ import com.poi.yow_point.config.postGIS_Converter.PointToPostgresqlGeographyConv
 import com.poi.yow_point.config.postGIS_Converter.StringToPointConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.r2dbc.convert.R2dbcCustomConversions;
 import org.springframework.data.r2dbc.dialect.PostgresDialect;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
+@Profile("!test")
 public class R2dbcConfig {
 
     @Bean
