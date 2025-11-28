@@ -215,10 +215,10 @@ public class AppUserController {
                                 .doOnComplete(() -> log.info("Completed fetching users with role: {}", role));
         }
 
-        @GetMapping("/organization/{org_id}/count")
+        @GetMapping("/organization/{orgId}/count")
         @Operation(summary = "Count active users in organization")
         @ApiResponse(responseCode = "200", description = "Returns count of active users in organization")
-        public Mono<ResponseEntity<Long>> countActiveUsersByOrganization(@PathVariable("org_id") UUID orgId) {
+        public Mono<ResponseEntity<Long>> countActiveUsersByOrganization(@PathVariable UUID orgId) {
                 return appUserService.countActiveUsersByOrganization(orgId)
                                 .map(ResponseEntity::ok);
         }
