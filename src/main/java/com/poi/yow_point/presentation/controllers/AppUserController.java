@@ -199,7 +199,7 @@ public class AppUserController {
         @GetMapping("/organization/{org_id}/active")
         @Operation(summary = "Get active users by organization")
         @ApiResponse(responseCode = "200", description = "Successfully retrieved active users for organization")
-        public Flux<AppUserDTO> getActiveUsersByOrganization(@PathVariable("org_id") UUID orgId) {
+        public Flux<AppUserDTO> getActiveUsersByOrganization(@PathVariable UUID orgId) {
                 log.info("Received request to get active users for organization: {}", orgId);
                 return appUserService.getActiveUsersByOrganization(orgId)
                                 .doOnComplete(() -> log.info("Completed fetching active users for organization: {}",
@@ -218,7 +218,7 @@ public class AppUserController {
         @GetMapping("/organization/{org_id}/count")
         @Operation(summary = "Count active users in organization")
         @ApiResponse(responseCode = "200", description = "Returns count of active users in organization")
-        public Mono<ResponseEntity<Long>> countActiveUsersByOrganization(@PathVariable("org_id") UUID orgId) {
+        public Mono<ResponseEntity<Long>> countActiveUsersByOrganization(@PathVariable UUID orgId) {
                 return appUserService.countActiveUsersByOrganization(orgId)
                                 .map(ResponseEntity::ok);
         }

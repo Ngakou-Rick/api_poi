@@ -222,7 +222,7 @@ APIs for managing application users.
               "orgId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
               "username": "johndoe",
               "email": "johndoe@example.com",
-              "phone": "123-456-7890",
+              "phone": "123-456-7890", #pas pris en compte(-)
               "role": "USER",
               "isActive": true,
               "createdAt": "2024-06-18T10:05:00Z"

@@ -39,7 +39,7 @@ class AppUserRepositoryImpl implements AppUserRepositoryCustom {
     @Override
     public Mono<Boolean> existsByOrgId(UUID orgId) {
         return template.exists(
-                Query.query(Criteria.where("org_id").is(orgId)),
+                Query.query(Criteria.where("orgId").is(orgId)),
                 AppUser.class);
     }
 
@@ -47,7 +47,7 @@ class AppUserRepositoryImpl implements AppUserRepositoryCustom {
     public Mono<Long> countActiveUsersByOrgId(UUID orgId) {
         return template.count(
                 Query.query(
-                        Criteria.where("org_id").is(orgId)
+                        Criteria.where("orgId").is(orgId)
                                 .and("is_active").is(true)),
                 AppUser.class);
     }
@@ -56,7 +56,7 @@ class AppUserRepositoryImpl implements AppUserRepositoryCustom {
     public Flux<AppUser> findByOrgIdAndIsActive(UUID orgId, Boolean isActive) {
         return template.select(
                 Query.query(
-                        Criteria.where("org_id").is(orgId)
+                        Criteria.where("orgId").is(orgId)
                                 .and("is_active").is(isActive)),
                 AppUser.class);
     }
