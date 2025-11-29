@@ -36,6 +36,9 @@ class KafkaIntegrationTest {
     @MockBean
     private PointOfInterestRepository pointOfInterestRepository;
 
+    @MockBean
+    private com.poi.yow_point.infrastructure.repositories.poiDocument.PoiDocumentRepository poiDocumentRepository;
+
     @Autowired
     private TestConsumer testConsumer;
 
