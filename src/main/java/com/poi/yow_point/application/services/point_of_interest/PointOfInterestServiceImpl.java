@@ -141,7 +141,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     }
 
     @Override
-    public Flux<PointOfInterestDTO> findByType(String poiType) {
+    public Flux<PointOfInterestDTO> findByType(com.poi.yow_point.application.model.PoiType poiType) {
         return repository.findByPoiType(poiType)
                 .map(mapper::toDto)
                 .doOnComplete(() -> log.debug("Retrieved POIs by type: {}", poiType))
@@ -149,7 +149,7 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     }
 
     @Override
-    public Flux<PointOfInterestDTO> findByCategory(String poiCategory) {
+    public Flux<PointOfInterestDTO> findByCategory(com.poi.yow_point.application.model.PoiCategory poiCategory) {
         return repository.findByPoiCategory(poiCategory)
                 .map(mapper::toDto)
                 .doOnComplete(() -> log.debug("Retrieved POIs by category: {}", poiCategory))
