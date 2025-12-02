@@ -1,5 +1,7 @@
 package com.poi.yow_point.infrastructure.repositories.PointOfInterest;
 
+import java.util.UUID;
+
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -15,7 +17,6 @@ import com.poi.yow_point.infrastructure.entities.PointOfInterest;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class PointOfInterestRepositoryImpl implements PointOfInterestRepositoryC
                 String wkt = String.format("SRID=4326;POINT(%f %f)", longitude, latitude);
 
                 return entityTemplate.getDatabaseClient()
-                                .sql("SELECT * FROM point_of_interest WHERE ST_DWithin(location, ST_GeomFromText(:wkt), :distance)")
+                                .sql("SELECT * FROM point_of_interest WHERE ST_DWithin(location_geog, ST_GeomFromText(:wkt), :distance)")
                                 .bind("wkt", wkt)
                                 .bind("distance", radiusKm * 1000) // Conversion km → mètres (PostGIS)
                                 .map((row, metadata) -> entityTemplate.getConverter().read(PointOfInterest.class, row,

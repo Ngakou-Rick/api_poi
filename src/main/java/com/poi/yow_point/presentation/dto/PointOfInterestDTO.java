@@ -1,11 +1,12 @@
 package com.poi.yow_point.presentation.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.poi.yow_point.application.model.PoiCategory;
+import com.poi.yow_point.application.model.PoiType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,23 +22,38 @@ public class PointOfInterestDTO {
     @JsonProperty("poi_id")
     private UUID poiId;
 
-    @JsonProperty("created_by_user_id")
-    private UUID createdByUserId;
-
     @JsonProperty("organization_id")
     private UUID organizationId;
+
+    @JsonProperty("town_id")
+    private UUID townId;
+
+    @JsonProperty("created_by_user_id")
+    private UUID createdByUserId;
 
     @JsonProperty("poi_name")
     private String poiName;
 
     @JsonProperty("poi_type")
-    private String poiType;
+    private PoiType poiType;
 
     @JsonProperty("poi_category")
-    private String poiCategory;
+    private PoiCategory poiCategory;
+
+    @JsonProperty("poi_long_name")
+    private String poiLongName;
+
+    @JsonProperty("poi_short_name")
+    private String poiShortName;
+
+    @JsonProperty("poi_friendly_name")
+    private String poiFriendlyName;
 
     @JsonProperty("poi_description")
     private String poiDescription;
+
+    @JsonProperty("poi_logo")
+    private byte[] poiLogo;
 
     @JsonProperty("latitude")
     private Double latitude;
@@ -54,17 +70,17 @@ public class PointOfInterestDTO {
     @JsonProperty("address_city")
     private String addressCity;
 
+    @JsonProperty("address_state_province")
+    private String addressStateProvince;
+
     @JsonProperty("address_postal_code")
     private String addressPostalCode;
 
     @JsonProperty("address_country")
     private String addressCountry;
 
-    @JsonProperty("address_state_province")
-    private String stateProvince;
-
     @JsonProperty("address_informal")
-    private String informalAddress;
+    private String addressInformal;
 
     @JsonProperty("website_url")
     private String websiteUrl;
@@ -75,6 +91,8 @@ public class PointOfInterestDTO {
     @JsonProperty("poi_contacts")
     private Map<String, Object> poiContacts;
 
+
+
     @JsonProperty("poi_images_urls")
     private List<String> poiImagesUrls;
 
@@ -84,14 +102,26 @@ public class PointOfInterestDTO {
     @JsonProperty("poi_keywords")
     private List<String> poiKeywords;
 
+    @JsonProperty("poi_type_tags")
+    private List<String> poiTypeTags;
+
     @JsonProperty("popularity_score")
     private Float popularityScore;
 
     @JsonProperty("is_active")
     private Boolean isActive;
 
+    @JsonProperty("deactivation_reason")
+    private String deactivationReason;
+
+    @JsonProperty("deactivated_by_user_id")
+    private UUID deactivatedByUserId;
+
     @JsonProperty("created_at")
     private Instant createdAt;
+
+    @JsonProperty("updated_by_user_id")
+    private UUID updatedByUserId;
 
     @JsonProperty("updated_at")
     private Instant updatedAt;
