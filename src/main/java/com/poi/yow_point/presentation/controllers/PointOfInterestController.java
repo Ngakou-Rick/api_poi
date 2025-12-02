@@ -174,7 +174,7 @@ public class PointOfInterestController {
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
         })
         public Flux<PointOfInterestDTO> getPoisByType(
-                        @Parameter(description = "Type of the POI", required = true, example = "restaurant") @PathVariable String type) {
+                        @Parameter(description = "Type of the POI", required = true, example = "RESTAURANT") @PathVariable com.poi.yow_point.application.model.PoiType type) {
                 log.debug("REST request to get POIs by type: {}", type);
 
                 return poiService.findByType(type)
@@ -192,7 +192,7 @@ public class PointOfInterestController {
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
         })
         public Flux<PointOfInterestDTO> getPoisByCategory(
-                        @Parameter(description = "Category of the POI", required = true, example = "food") @PathVariable String category) {
+                        @Parameter(description = "Category of the POI", required = true, example = "FOOD_DRINK") @PathVariable com.poi.yow_point.application.model.PoiCategory category) {
                 log.debug("REST request to get POIs by category: {}", category);
 
                 return poiService.findByCategory(category)

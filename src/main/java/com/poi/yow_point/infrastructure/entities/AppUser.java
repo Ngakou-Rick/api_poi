@@ -1,5 +1,6 @@
 package com.poi.yow_point.infrastructure.entities;
 
+import com.poi.yow_point.application.model.Role;
 import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -23,7 +24,7 @@ public class AppUser {
     private UUID userId;
 
     @Column("organization_id")
-    private UUID orgId; // Référence vers l'organisation (clé étrangère)
+    private UUID organizationId;
 
     @Column("username")
     private String username;
@@ -38,7 +39,7 @@ public class AppUser {
     private String passwordHash;
 
     @Column("role")
-    private String role; // e.g. 'USER', 'ADMIN', 'SUPER_ADMIN'
+    private Role role;
 
     @Column("is_active")
     @Builder.Default
@@ -49,11 +50,4 @@ public class AppUser {
     @Builder.Default
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
-    // Note: Dans R2DBC, les relations sont gérées différemment
-    // Les relations OneToMany et ManyToOne ne sont pas supportées nativement
-    // Il faut gérer les relations manuellement via des services séparés
-    // Exemples :
-    // - Pour récupérer l'organisation : OrganizationService.findById(orgId)
-    // - Pour récupérer les POIs créés : PoiService.findByCreatedBy(userId)
-    // - Pour récupérer les reviews : PoiReviewService.findByUserId(userId)
 }

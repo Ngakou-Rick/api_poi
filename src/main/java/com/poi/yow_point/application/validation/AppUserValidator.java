@@ -29,7 +29,7 @@ public class AppUserValidator {
      */
     public Mono<Void> validateForCreation(AppUserDTO userDTO) {
         return Mono.when(
-                validateOrganizationExists(userDTO.getOrgId()),
+                validateOrganizationExists(userDTO.getOrganizationId()),
                 validateUsernameUnique(userDTO.getUsername()),
                 validateEmailUnique(userDTO.getEmail()),
                 validatePasswordPresent(userDTO.getPassword()));
@@ -41,7 +41,7 @@ public class AppUserValidator {
     public Mono<Void> validateForUpdate(UUID userId, AppUserDTO userDTO) {
         return Mono.when(
                 validateUserExists(userId),
-                validateOrganizationExists(userDTO.getOrgId()),
+                validateOrganizationExists(userDTO.getOrganizationId()),
                 validateUsernameUniqueForUpdate(userId, userDTO.getUsername()),
                 validateEmailUniqueForUpdate(userId, userDTO.getEmail()));
     }

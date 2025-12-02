@@ -56,8 +56,8 @@ class KafkaIntegrationTest {
         PointOfInterestDTO poiDto = new PointOfInterestDTO();
         poiDto.setPoiName("Test POI From Test");
         poiDto.setOrganizationId(UUID.randomUUID());
-        poiDto.setPoiCategory("Test Category");
-        poiDto.setPoiType("Test Type");
+        poiDto.setPoiCategory(com.poi.yow_point.application.model.PoiCategory.FOOD_DRINK);
+        poiDto.setPoiType(com.poi.yow_point.application.model.PoiType.RESTAURANT);
         poiDto.setAddressStreetName("Test Address");
         poiDto.setAddressCity("Test City");
         poiDto.setAddressCountry("Test Country");
