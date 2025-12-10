@@ -17,16 +17,16 @@ public class OrganizationValidator implements Validator {
     public void validate(Object target, Errors errors) {
         OrganizationDTO dto = (OrganizationDTO) target;
 
-        if (dto.getOrgName() == null || dto.getOrgName().trim().isEmpty()) {
-            errors.rejectValue("orgName", "orgName.empty", "Organization name cannot be empty");
+        if (dto.getOrganizationName() == null || dto.getOrganizationName().trim().isEmpty()) {
+            errors.rejectValue("organizationName", "organizationName.empty", "Organization name cannot be empty");
         }
 
         if (dto.getOrgCode() == null || dto.getOrgCode().trim().isEmpty()) {
             errors.rejectValue("orgCode", "orgCode.empty", "Organization code cannot be empty");
         }
 
-        if (dto.getOrgType() == null || dto.getOrgType().trim().isEmpty()) {
-            errors.rejectValue("orgType", "orgType.empty", "Organization type cannot be empty");
+        if (dto.getOrgType() == null) {
+            errors.rejectValue("orgType", "orgType.null", "Organization type cannot be null");
         }
     }
 }

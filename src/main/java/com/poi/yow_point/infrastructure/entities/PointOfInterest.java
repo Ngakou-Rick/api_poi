@@ -1,17 +1,16 @@
 package com.poi.yow_point.infrastructure.entities;
 
-import org.locationtech.jts.geom.Point;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
+import com.poi.yow_point.application.model.PoiCategory;
+import com.poi.yow_point.application.model.PoiType;
 import io.r2dbc.postgresql.codec.Json;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import org.locationtech.jts.geom.Point;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -20,8 +19,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-@Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,27 +29,41 @@ public class PointOfInterest {
     @Column("poi_id")
     private UUID poiId;
 
-    @Column("created_by_user_id")
-    private UUID createdByUserId;
-
     @Column("organization_id")
     private UUID organizationId;
+
+    @Column("town_id")
+    private UUID townId;
+
+    @Column("created_by_user_id")
+    private UUID createdByUserId;
 
     @Column("poi_name")
     private String poiName;
 
     @Column("poi_type")
-    private String poiType;
+    private PoiType poiType;
 
     @Column("poi_category")
-    private String poiCategory;
+    private PoiCategory poiCategory;
+
+    @Column("poi_long_name")
+    private String poiLongName;
+
+    @Column("poi_short_name")
+    private String poiShortName;
+
+    @Column("poi_friendly_name")
+    private String poiFriendlyName;
 
     @Column("poi_description")
     private String poiDescription;
 
-    // Utilisation de Point pour les coordonnées géographiques avec PostGIS
+    @Column("poi_logo")
+    private byte[] poiLogo;
+
     @Column("location_geog")
-    private Point location;
+    private Point locationGeog;
 
     @Column("address_street_number")
     private String addressStreetNumber;
@@ -63,17 +74,17 @@ public class PointOfInterest {
     @Column("address_city")
     private String addressCity;
 
+    @Column("address_state_province")
+    private String addressStateProvince;
+
     @Column("address_postal_code")
     private String addressPostalCode;
 
     @Column("address_country")
     private String addressCountry;
 
-    @Column("address_state_province")
-    private String stateProvince;
-
     @Column("address_informal")
-    private String informalAddress;
+    private String addressInformal;
 
     @Column("website_url")
     private String websiteUrl;
@@ -93,51 +104,74 @@ public class PointOfInterest {
     @Column("poi_keywords")
     private String poiKeywords;
 
+    @Column("poi_type_tags")
+    private String poiTypeTags;
+
     @Column("popularity_score")
     private Float popularityScore;
 
     @Column("is_active")
     private Boolean isActive;
 
+    @Column("deactivation_reason")
+    private String deactivationReason;
+
+    @Column("deactivated_by_user_id")
+    private UUID deactivatedByUserId;
+
     @Column("created_at")
     private Instant createdAt;
+
+    @Column("updated_by_user_id")
+    private UUID updatedByUserId;
 
     @Column("updated_at")
     private Instant updatedAt;
 
-    // Méthodes utilitaires
+
+    // --- Helper methods for comma-separated string fields ---
+
     public List<String> getPoiImagesUrlsList() {
         if (poiImagesUrls == null || poiImagesUrls.trim().isEmpty()) {
             return new ArrayList<>();
         }
-        return Arrays.asList(poiImagesUrls.split(","));
+        return Arrays.asList(poiImagesUrls.split("\\s*,\\s*"));
     }
 
     public void setPoiImagesUrlsList(List<String> urls) {
-        this.poiImagesUrls = urls != null ? String.join(",", urls) : null;
+        this.poiImagesUrls = (urls != null && !urls.isEmpty()) ? String.join(",", urls) : null;
     }
 
     public List<String> getPoiAmenitiesList() {
         if (poiAmenities == null || poiAmenities.trim().isEmpty()) {
             return new ArrayList<>();
         }
-        return Arrays.asList(poiAmenities.split(","));
+        return Arrays.asList(poiAmenities.split("\\s*,\\s*"));
     }
 
     public void setPoiAmenitiesList(List<String> amenities) {
-        this.poiAmenities = amenities != null ? String.join(",", amenities) : null;
+        this.poiAmenities = (amenities != null && !amenities.isEmpty()) ? String.join(",", amenities) : null;
     }
 
-    // ...
     public List<String> getPoiKeywordsList() {
-        if (poiKeywords == null || poiKeywords.trim().isEmpty()) { // CORRIGÉ
+        if (poiKeywords == null || poiKeywords.trim().isEmpty()) {
             return new ArrayList<>();
         }
-        return Arrays.asList(poiKeywords.split(",")); // CORRIGÉ
+        return Arrays.asList(poiKeywords.split("\\s*,\\s*"));
     }
 
-    public void setPoiKeywordsList(List<String> keywords) { // CORRIGÉ
-        this.poiKeywords = keywords != null ? String.join(",", keywords) : null;
+    public void setPoiKeywordsList(List<String> keywords) {
+        this.poiKeywords = (keywords != null && !keywords.isEmpty()) ? String.join(",", keywords) : null;
     }
-    // ...
+
+    public List<String> getPoiTypeTagsList() {
+        if (poiTypeTags == null || poiTypeTags.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        return Arrays.asList(poiTypeTags.split("\\s*,\\s*"));
+    }
+
+    public void setPoiTypeTagsList(List<String> tags) {
+        this.poiTypeTags = (tags != null && !tags.isEmpty()) ? String.join(",", tags) : null;
+    }
 }

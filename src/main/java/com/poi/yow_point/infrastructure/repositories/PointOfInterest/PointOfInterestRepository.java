@@ -17,9 +17,9 @@ public interface PointOfInterestRepository
 
         Flux<PointOfInterest> findByOrganizationId(UUID organizationId);
 
-        Flux<PointOfInterest> findByPoiType(String poiType);
+        Flux<PointOfInterest> findByPoiType(com.poi.yow_point.application.model.PoiType poiType);
 
-        Flux<PointOfInterest> findByPoiCategory(String poiCategory);
+        Flux<PointOfInterest> findByPoiCategory(com.poi.yow_point.application.model.PoiCategory poiCategory);
 
         Flux<PointOfInterest> findByPoiNameContainingIgnoreCase(String poiName);
 

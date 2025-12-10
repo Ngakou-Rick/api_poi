@@ -36,7 +36,7 @@ public class ElasticsearchIntegrationTest {
         // Given
         PointOfInterest poi = new PointOfInterest();
         poi.setPoiId(UUID.randomUUID());
-        poi.setLocation(geometryFactory.createPoint(new Coordinate(0, 0)));
+        poi.setLocationGeog(geometryFactory.createPoint(new Coordinate(0, 0)));
         poi.setPoiName("Test POI");
 
         when(poiDocumentRepository.save(any(PoiDocument.class))).thenReturn(Mono.just(new PoiDocument()));
@@ -54,7 +54,7 @@ public class ElasticsearchIntegrationTest {
         PointOfInterest poi = new PointOfInterest();
         UUID poiId = UUID.randomUUID();
         poi.setPoiId(poiId);
-        poi.setLocation(geometryFactory.createPoint(new Coordinate(0, 0)));
+        poi.setLocationGeog(geometryFactory.createPoint(new Coordinate(0, 0)));
 
         when(poiDocumentRepository.deleteById(poiId.toString())).thenReturn(Mono.empty());
 
