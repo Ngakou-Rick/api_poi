@@ -20,9 +20,9 @@ public interface PointOfInterestService {
 
     Flux<PointOfInterestDTO> findByLocationWithinRadius(Double latitude, Double longitude, Double radiusKm);
 
-    Flux<PointOfInterestDTO> findByType(String poiType);
+    Flux<PointOfInterestDTO> findByType(com.poi.yow_point.application.model.PoiType poiType);
 
-    Flux<PointOfInterestDTO> findByCategory(String poiCategory);
+    Flux<PointOfInterestDTO> findByCategory(com.poi.yow_point.application.model.PoiCategory poiCategory);
 
     Flux<PointOfInterestDTO> searchByName(String name);
 

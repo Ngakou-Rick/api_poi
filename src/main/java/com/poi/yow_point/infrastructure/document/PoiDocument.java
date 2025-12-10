@@ -29,10 +29,13 @@ public class PoiDocument {
     private UUID poiId;
 
     @Field(type = FieldType.Keyword)
-    private UUID createdByUserId;
+    private UUID organizationId;
 
     @Field(type = FieldType.Keyword)
-    private UUID organizationId;
+    private UUID townId;
+
+    @Field(type = FieldType.Keyword)
+    private UUID createdByUserId;
 
     @Field(type = FieldType.Text)
     private String poiName;
@@ -42,6 +45,15 @@ public class PoiDocument {
 
     @Field(type = FieldType.Keyword)
     private String poiCategory;
+
+    @Field(type = FieldType.Text)
+    private String poiLongName;
+
+    @Field(type = FieldType.Text)
+    private String poiShortName;
+
+    @Field(type = FieldType.Text)
+    private String poiFriendlyName;
 
     @Field(type = FieldType.Text)
     private String poiDescription;
@@ -59,16 +71,16 @@ public class PoiDocument {
     private String addressCity;
 
     @Field(type = FieldType.Keyword)
+    private String addressStateProvince;
+
+    @Field(type = FieldType.Keyword)
     private String addressPostalCode;
 
     @Field(type = FieldType.Keyword)
     private String addressCountry;
 
-    @Field(type = FieldType.Keyword)
-    private String stateProvince;
-
     @Field(type = FieldType.Text)
-    private String informalAddress;
+    private String addressInformal;
 
     @Field(type = FieldType.Keyword)
     private String websiteUrl;
@@ -88,14 +100,26 @@ public class PoiDocument {
     @Field(type = FieldType.Keyword)
     private List<String> poiKeywords;
 
+    @Field(type = FieldType.Keyword)
+    private List<String> poiTypeTags;
+
     @Field(type = FieldType.Float)
     private Float popularityScore;
 
     @Field(type = FieldType.Boolean)
     private Boolean isActive;
 
+    @Field(type = FieldType.Text)
+    private String deactivationReason;
+
+    @Field(type = FieldType.Keyword)
+    private UUID deactivatedByUserId;
+
     @Field(type = FieldType.Date)
     private Instant createdAt;
+
+    @Field(type = FieldType.Keyword)
+    private UUID updatedByUserId;
 
     @Field(type = FieldType.Date)
     private Instant updatedAt;

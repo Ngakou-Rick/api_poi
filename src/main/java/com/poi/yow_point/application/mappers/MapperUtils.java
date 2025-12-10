@@ -43,6 +43,7 @@ public class MapperUtils {
 
     // --- Méthodes pour les conversions String <-> List ---
 
+    @Named("stringToList")
     public List<String> stringToList(String csvString) {
         if (csvString == null || csvString.trim().isEmpty()) {
             return new ArrayList<>();
@@ -53,6 +54,7 @@ public class MapperUtils {
                 .collect(Collectors.toList());
     }
 
+    @Named("listToString")
     public String listToString(List<String> list) {
         if (list == null || list.isEmpty()) {
             return null;
@@ -65,6 +67,7 @@ public class MapperUtils {
 
     // --- Méthodes pour les conversions JSON <-> Map ---
 
+    @Named("jsonToMap")
     public Map<String, Object> jsonToMap(Json jsonData) {
         if (jsonData == null || jsonData.asString() == null || "{}".equals(jsonData.asString())) {
             return new HashMap<>();
@@ -77,6 +80,7 @@ public class MapperUtils {
         }
     }
 
+    @Named("mapToJson")
     public Json mapToJson(Map<String, Object> map) {
         if (map == null || map.isEmpty()) {
             return Json.of("{}");
@@ -95,18 +99,14 @@ public class MapperUtils {
         if (jsonNode == null || jsonNode.isNull()) {
             return new HashMap<>();
         }
-        // ObjectMapper peut convertir directement un JsonNode en Map
         return objectMapper.convertValue(jsonNode, new TypeReference<Map<String, Object>>() {
         });
     }
 
     public JsonNode mapToJsonNode(Map<String, Object> map) {
         if (map == null || map.isEmpty()) {
-            // Retourner un JsonNode null ou un objet vide selon votre logique métier.
-            // Null est souvent plus simple si le champ peut être null en BDD.
             return null;
         }
-        // ObjectMapper peut convertir directement une Map en JsonNode
         return objectMapper.valueToTree(map);
     }
 }
