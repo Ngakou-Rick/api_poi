@@ -1,5 +1,6 @@
 package com.poi.yow_point.application.mappers;
 
+import com.poi.yow_point.infrastructure.elasticsearch.document.PoiDocument;
 import com.poi.yow_point.infrastructure.entities.PointOfInterest;
 import com.poi.yow_point.presentation.dto.PointOfInterestDTO;
 import org.mapstruct.*;
@@ -20,6 +21,11 @@ public interface PointOfInterestMapper {
     @Mapping(source = "poiAmenities", target = "poiAmenities") // stringToList sera utilisé
     @Mapping(source = "poiKeywords", target = "poiKeywords") // stringToList sera utilisé
     PointOfInterestDTO toDto(PointOfInterest entity);
+
+    @Mapping(source = "id", target = "poiId")
+    @Mapping(source = "location.lat", target = "latitude")
+    @Mapping(source = "location.lon", target = "longitude")
+    PointOfInterestDTO toDto(PoiDocument document);
 
     /**
      * Convertit un DTO en entité PointOfInterest pour la création.

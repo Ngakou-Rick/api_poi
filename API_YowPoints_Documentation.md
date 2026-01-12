@@ -662,3 +662,35 @@ APIs for managing Points of Interest (POIs).
     curl -X GET "http://localhost:8080/api/v1/pois/active/popular"
     ```
 ---
+
+## Local Development Environment
+
+To run the application locally with all its features, you need to have Docker and Docker Compose installed. The following services are required:
+
+-   **PostgreSQL with PostGIS**: The primary database.
+-   **Apache Kafka**: Used for event-driven communication between services.
+-   **Elasticsearch**: Powers the search functionality.
+
+### Running with Docker Compose
+
+A `docker-compose.yml` file is provided to easily start all the required services. To launch the entire environment, run the following command from the root of the project:
+
+```bash
+docker-compose up -d
+```
+
+This will start PostgreSQL, Kafka, and Elasticsearch in detached mode.
+
+### Services
+
+-   **PostgreSQL**: Available at `localhost:5432`.
+-   **Kafka**: Available at `localhost:9092`.
+-   **Elasticsearch**: Available at `http://localhost:9200`.
+
+---
+
+## Search Functionality
+
+**Note**: The search-related endpoints (`/api/v1/pois/nearby`, `/api/v1/pois?name=...`, etc.) are powered by Elasticsearch. The data is indexed in Elasticsearch asynchronously via Kafka events. This means there might be a slight delay between the creation or update of a POI and its availability in the search results.
+
+---
