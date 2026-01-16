@@ -2,9 +2,8 @@ package com.poi.yow_point.application.service;
 
 import com.poi.yow_point.infrastructure.mappers.PoiReviewMapper;
 import com.poi.yow_point.domain.ports.in.PoiReviewService;
-import com.poi.yow_point.application.service.PoiEventPublisher;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.PoiReviewEntity;
-import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryReview.PoiReviewRepository;
+import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PoiReviewRepository;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiReviewDTO;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.validation.PoiReviewValidator;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,6 @@ public class PoiReviewServiceImpl implements PoiReviewService {
     private final PoiReviewMapper poiReviewMapper;
     private final PoiReviewValidator poiReviewValidator;
     private final R2dbcEntityTemplate entityTemplate;
-    private final PoiEventPublisher eventPublisher;
 
     @Override
     public Mono<PoiReviewDTO> createReview(PoiReviewDTO reviewDTO) {

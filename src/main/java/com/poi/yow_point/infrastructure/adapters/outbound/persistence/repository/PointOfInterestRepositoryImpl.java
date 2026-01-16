@@ -1,9 +1,5 @@
-package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PointOfInterestEntity;
+package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -22,8 +18,7 @@ import java.util.UUID;
 public class PointOfInterestRepositoryImpl implements PointOfInterestRepositoryCustom {
 
         private final R2dbcEntityTemplate entityTemplate;
-        private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-
+        
         @Override
         public Flux<PointOfInterestEntity> findTopByPopularityScore(Integer limit) {
                 return entityTemplate.select(PointOfInterestEntity.class)
@@ -37,7 +32,6 @@ public class PointOfInterestRepositoryImpl implements PointOfInterestRepositoryC
         // Implémentation d'une méthode géospatiale avec Criteria
         @Override
         public Flux<PointOfInterestEntity> findByLocationWithinRadius(Double latitude, Double longitude, Double radiusKm) {
-                Point center = geometryFactory.createPoint(new Coordinate(longitude, latitude));
                 String wkt = String.format("SRID=4326;POINT(%f %f)", longitude, latitude);
 
                 return entityTemplate.getDatabaseClient()

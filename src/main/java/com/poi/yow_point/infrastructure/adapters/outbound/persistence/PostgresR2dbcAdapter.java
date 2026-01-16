@@ -1,6 +1,6 @@
 package com.poi.yow_point.infrastructure.adapters.outbound.persistence;
 
-import com.poi.yow_point.domain.model.AppUserEntity;
+import com.poi.yow_point.domain.model.AppUser;
 import com.poi.yow_point.domain.ports.out.AppUserRepositoryPort;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.mappers.PersistenceMapper;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.AppUserRepository;
@@ -18,31 +18,31 @@ public class PostgresR2dbcAdapter implements AppUserRepositoryPort {
     private final PersistenceMapper mapper;
 
     @Override
-    public Mono<AppUserEntity> save(AppUserEntity appUser) {
+    public Mono<AppUser> save(AppUser appUser) {
         return appUserRepository.save(mapper.toEntity(appUser))
                 .map(mapper::toDomain);
     }
 
     @Override
-    public Mono<AppUserEntity> findById(UUID id) {
+    public Mono<AppUser> findById(UUID id) {
         return appUserRepository.findById(id)
                 .map(mapper::toDomain);
     }
 
     @Override
-    public Mono<AppUserEntity> findByUsername(String username) {
+    public Mono<AppUser> findByUsername(String username) {
         return appUserRepository.findByUsername(username)
                 .map(mapper::toDomain);
     }
 
     @Override
-    public Mono<AppUserEntity> findByEmail(String email) {
+    public Mono<AppUser> findByEmail(String email) {
         return appUserRepository.findByEmail(email)
                 .map(mapper::toDomain);
     }
 
     @Override
-    public Flux<AppUserEntity> findAll() {
+    public Flux<AppUser> findAll() {
         return appUserRepository.findAll()
                 .map(mapper::toDomain);
     }
@@ -58,13 +58,13 @@ public class PostgresR2dbcAdapter implements AppUserRepositoryPort {
     }
 
     @Override
-    public Flux<AppUserEntity> findByOrgIdAndIsActive(UUID orgId, Boolean isActive) {
+    public Flux<AppUser> findByOrgIdAndIsActive(UUID orgId, Boolean isActive) {
         return appUserRepository.findByOrgIdAndIsActive(orgId, isActive)
                 .map(mapper::toDomain);
     }
 
     @Override
-    public Flux<AppUserEntity> findByRole(String role) {
+    public Flux<AppUser> findByRole(String role) {
         return appUserRepository.findByRole(role)
                 .map(mapper::toDomain);
     }

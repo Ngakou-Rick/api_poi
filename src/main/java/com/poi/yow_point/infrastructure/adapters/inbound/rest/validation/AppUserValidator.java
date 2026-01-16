@@ -1,9 +1,8 @@
 package com.poi.yow_point.infrastructure.adapters.inbound.rest.validation;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryUser.AppUserRepository;
+import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.AppUserRepository;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.OrganizationRepository;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.AppUserDTO;
 
@@ -17,7 +16,6 @@ public class AppUserValidator {
     private final AppUserRepository appUserRepository;
     private final OrganizationRepository organizationRepository;
 
-    @Autowired
     public AppUserValidator(AppUserRepository appUserRepository,
             OrganizationRepository organizationRepository) {
         this.appUserRepository = appUserRepository;

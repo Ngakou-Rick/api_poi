@@ -4,7 +4,6 @@ import com.poi.yow_point.domain.ports.in.PoiAccessLogPort;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiAccessLogDTO;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;

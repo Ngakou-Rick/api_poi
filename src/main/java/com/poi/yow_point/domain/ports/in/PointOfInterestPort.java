@@ -1,4 +1,4 @@
-package com.poi.yow_point.application.service;
+package com.poi.yow_point.domain.ports.in;
 
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PointOfInterestDTO;
 

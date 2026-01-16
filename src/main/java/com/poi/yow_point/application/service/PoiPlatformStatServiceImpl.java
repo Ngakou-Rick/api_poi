@@ -1,13 +1,12 @@
 package com.poi.yow_point.application.service;
 
+import com.poi.yow_point.domain.ports.in.PoiPlatformStatPort;
 import com.poi.yow_point.infrastructure.mappers.PoiPlatformStatMapper;
-import com.poi.yow_point.application.service.PoiPlatformStatService;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.validation.PoiPlatformStatValidator;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.PoiPlatformStatEntity;
-import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryPlatformStat.PoiPlatformStatRepository;
+import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PoiPlatformStatRepository;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiPlatformStatDTO;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;

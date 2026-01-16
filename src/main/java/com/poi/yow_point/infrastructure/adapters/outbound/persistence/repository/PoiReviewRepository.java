@@ -1,4 +1,4 @@
-package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryReview;
+package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository;
 
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.PoiReviewEntity;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;

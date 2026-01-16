@@ -1,4 +1,4 @@
-package com.poi.yow_point.infrastructure.adapters.inbound.rest.websocketDTO;
+package com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.websocket;
 
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PointOfInterestDTO;
 

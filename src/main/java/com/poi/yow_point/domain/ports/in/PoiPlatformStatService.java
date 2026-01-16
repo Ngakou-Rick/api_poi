@@ -7,11 +7,9 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public interface PoiPlatformStatPort {
+public interface PoiPlatformStatService {
 
     Mono<PoiPlatformStatDTO> createStat(PoiPlatformStatDTO statDTO);
-
-    Mono<PoiPlatformStatDTO> updateStat(UUID statId, PoiPlatformStatDTO statDTO);
 
     Flux<PoiPlatformStatDTO> getAllStats();
 
@@ -28,6 +26,8 @@ public interface PoiPlatformStatPort {
     Flux<PoiPlatformStatDTO> getStatsByDateRange(LocalDate startDate, LocalDate endDate);
 
     Flux<PoiPlatformStatDTO> getStatsByOrgIdAndDateRange(UUID orgId, LocalDate startDate, LocalDate endDate);
+
+    Mono<PoiPlatformStatDTO> updateStat(UUID statId, PoiPlatformStatDTO statDTO);
 
     Mono<Void> deleteStat(UUID statId);
 

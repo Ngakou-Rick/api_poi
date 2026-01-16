@@ -1,4 +1,4 @@
-package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryAccessLog;
+package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository;
 
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 //import org.springframework.stereotype.Repository;

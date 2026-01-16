@@ -5,10 +5,10 @@ import com.poi.yow_point.domain.ports.in.PoiAccessLogPort;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.validation.PoiAccessLogValidator;
 //import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.PoiAccessLogEntity;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PoiAccessLogRepository;
-import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PoiAccessLogRepositoryCustom;
+//import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PoiAccessLogRepositoryCustom;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiAccessLogDTO;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+//import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class PoiAccessLogServiceImpl implements PoiAccessLogServicePort {
+public class PoiAccessLogServiceImpl implements PoiAccessLogPort {
 
     private static final Logger log = LoggerFactory.getLogger(PoiAccessLogServiceImpl.class);
 

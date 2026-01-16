@@ -1,4 +1,4 @@
-package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryUser;
+package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository;
 
 import java.util.UUID;
 

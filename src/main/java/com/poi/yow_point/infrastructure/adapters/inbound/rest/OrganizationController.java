@@ -11,9 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -30,9 +27,7 @@ import java.util.UUID;
 @Tag(name = "Organization API", description = "APIs for managing organizations")
 public class OrganizationController {
 
-    private static final Logger log = LoggerFactory.getLogger(OrganizationController.class);
-
-        private final OrganizationPort organizationService;
+            private final OrganizationPort organizationService;
         private final OrganizationValidator validator;
 
         public OrganizationController(OrganizationPort organizationService,

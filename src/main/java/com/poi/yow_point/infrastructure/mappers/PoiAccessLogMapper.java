@@ -7,7 +7,7 @@ import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.Poi
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiAccessLogDTO;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+//import lombok.extern.slf4j.Slf4j;
 
 //import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PoiAccessLogMapper {
@@ -50,8 +49,8 @@ public class PoiAccessLogMapper {
                             });
                     builder.metadata(metadataMap);
                 } catch (Exception e) {
-                    log.warn("Erreur lors de la conversion des métadonnées JsonNode vers Map pour l'entité {}: {}",
-                            entity.getAccessId(), e.getMessage());
+                    System.err.println("Erreur lors de la conversion des métadonnées JsonNode vers Map pour l'entité: " +
+                            entity.getAccessId() + " - " + e.getMessage());
                     builder.metadata(null);
                 }
             }
@@ -69,7 +68,7 @@ public class PoiAccessLogMapper {
                 return null;
             }
 
-            PoiAccessLogEntity.PoiAccessLogBuilder builder = PoiAccessLogEntity.builder()
+            var builder = PoiAccessLogEntity.builder()
                     .accessId(dto.getAccessId())
                     .poiId(dto.getPoiId())
                     .organizationId(dto.getOrganizationId())
@@ -84,8 +83,8 @@ public class PoiAccessLogMapper {
                     JsonNode metadataNode = objectMapper.valueToTree(dto.getMetadata());
                     builder.metadata(metadataNode);
                 } catch (Exception e) {
-                    log.warn("Erreur lors de la conversion des métadonnées Map vers JsonNode pour le DTO {}: {}",
-                            dto.getAccessId(), e.getMessage());
+                    System.err.println("Erreur lors de la conversion des métadonnées Map vers JsonNode pour le DTO: " +
+                            dto.getAccessId() + " - " + e.getMessage());
                     builder.metadata(null);
                 }
             }
@@ -145,8 +144,8 @@ public class PoiAccessLogMapper {
                     JsonNode metadataNode = objectMapper.valueToTree(dto.getMetadata());
                     existingEntity.setMetadata(metadataNode);
                 } catch (Exception e) {
-                    log.warn("Erreur lors de la mise à jour des métadonnées pour l'entité {}: {}",
-                            existingEntity.getAccessId(), e.getMessage());
+                    System.err.println("Erreur lors de la mise à jour des métadonnées pour l'entité: " +
+                            existingEntity.getAccessId() + " - " + e.getMessage());
                 }
             }
 
@@ -166,7 +165,7 @@ public class PoiAccessLogMapper {
             return objectMapper.convertValue(jsonNode, new TypeReference<Map<String, Object>>() {
             });
         } catch (Exception e) {
-            log.warn("Erreur lors de la conversion JsonNode vers Map: {}", e.getMessage());
+            System.err.println("Erreur lors de la conversion JsonNode vers Map: " + e.getMessage());
             return null;
         }
     }
@@ -182,7 +181,7 @@ public class PoiAccessLogMapper {
         try {
             return objectMapper.valueToTree(map);
         } catch (Exception e) {
-            log.warn("Erreur lors de la conversion Map vers JsonNode: {}", e.getMessage());
+            System.err.println("Erreur lors de la conversion Map vers JsonNode: " + e.getMessage());
             return null;
         }
     }

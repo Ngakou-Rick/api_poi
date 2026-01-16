@@ -7,7 +7,7 @@ import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 
-import com.poi.yow_point.presentation.websocketHandler.PoiWebSocketHandler;
+import com.poi.yow_point.infrastructure.adapters.inbound.websocketHandler.PoiWebSocketHandler;
 
 import java.util.HashMap;
 import java.util.Map;

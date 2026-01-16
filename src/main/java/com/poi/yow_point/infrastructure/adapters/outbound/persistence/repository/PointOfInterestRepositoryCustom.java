@@ -1,4 +1,4 @@
-package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PointOfInterestEntity;
+package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository;
 
 import java.util.UUID;
 

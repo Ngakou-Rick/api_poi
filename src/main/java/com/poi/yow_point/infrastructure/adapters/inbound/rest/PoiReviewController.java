@@ -218,7 +218,9 @@ public class PoiReviewController {
                                 poiReviewService.getReviewCountByPoiId(poiId))
                                 .map(tuple -> {
                                         var stats = new Object() {
+                                                @SuppressWarnings("unused")
                                                 public final Double averageRating = tuple.getT1();
+                                                @SuppressWarnings("unused")
                                                 public final Long reviewCount = tuple.getT2();
                                         };
                                         return ResponseEntity.ok((Object) stats);

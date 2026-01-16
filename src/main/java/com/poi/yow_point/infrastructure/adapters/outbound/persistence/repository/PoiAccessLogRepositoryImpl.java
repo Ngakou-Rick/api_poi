@@ -1,4 +1,4 @@
-package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryAccessLog;
+package com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository;
 
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.PoiAccessLogEntity;
 import lombok.RequiredArgsConstructor;
