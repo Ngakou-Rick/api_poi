@@ -101,6 +101,12 @@
 			<artifactId>reactor-kafka</artifactId>
 		</dependency>
 
+		<!-- Elasticsearch Reactive -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+		</dependency>
+
 		<!-- Resilience4j -->
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>

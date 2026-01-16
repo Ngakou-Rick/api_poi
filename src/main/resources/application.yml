@@ -5,15 +5,19 @@ spring:
   application:
     name: yow_point
   r2dbc:
-    url: r2dbc:postgresql://168.119.122.86:5432/yowyob_poi
-    username: postgres
-    password: postgres
+    url: r2dbc:postgresql://${DB_HOST:168.119.122.86}:5432/yowyob_poi
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
   data:
     redis:
-      host: 168.119.122.86
-      port: 7000
+      host: ${REDIS_HOST:168.119.122.86}
+      port: ${REDIS_PORT:7000}
+    elasticsearch:
+      cluster-nodes: ${ES_HOST:168.119.122.86}:9200
+  elasticsearch:
+    uris: http://${ES_HOST:168.119.122.86}:9200
   kafka:
-    bootstrap-servers: 168.119.122.86:9092
+    bootstrap-servers: ${KAFKA_HOST:168.119.122.86}:9092
   sql:
     init:
       mode: always
