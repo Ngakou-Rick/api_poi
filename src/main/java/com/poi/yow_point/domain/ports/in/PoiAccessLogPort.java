@@ -1,4 +1,4 @@
-package com.poi.yow_point.application.service;
+package com.poi.yow_point.domain.ports.in;
 
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiAccessLogDTO;
 import reactor.core.publisher.Flux;
@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 
-public interface PoiAccessLogService {
+public interface PoiAccessLogPort {
 
     Mono<PoiAccessLogDTO> createAccessLog(PoiAccessLogDTO dto);
 

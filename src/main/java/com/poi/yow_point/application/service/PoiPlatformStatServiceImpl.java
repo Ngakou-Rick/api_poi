@@ -8,6 +8,8 @@ import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiPlatformStatDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +21,12 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class PoiPlatformStatServiceImpl implements PoiPlatformStatPort {
+
+    private static final Logger log = LoggerFactory.getLogger(PoiPlatformStatServiceImpl.class);
 
     private final PoiPlatformStatRepository repository;
     private final PoiPlatformStatMapper mapper;

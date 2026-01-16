@@ -56,4 +56,24 @@ public class AppUserEntity {
     // - Pour récupérer l'organisation : OrganizationService.findById(orgId)
     // - Pour récupérer les POIs créés : PoiService.findByCreatedBy(userId)
     // - Pour récupérer les reviews : PoiReviewService.findByUserId(userId)
+
+    // Getters and Setters
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
+    public UUID getOrgId() { return orgId; }
+    public void setOrgId(UUID orgId) { this.orgId = orgId; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
 }

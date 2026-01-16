@@ -1,4 +1,4 @@
-package com.poi.yow_point.application.service;
+package com.poi.yow_point.domain.ports.in;
 
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.OrganizationDTO;
 import reactor.core.publisher.Flux;
@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
-public interface OrganizationService {
+public interface OrganizationPort {
 
     Mono<OrganizationDTO> saveOrganization(OrganizationDTO organizationDTO);
 

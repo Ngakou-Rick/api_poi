@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +24,14 @@ import reactor.core.publisher.Mono;
 import jakarta.validation.Valid;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/pois")
-@RequiredArgsConstructor
-@Slf4j
 @CrossOrigin(origins = "*", maxAge = 3600)
 @Tag(name = "Points d'Intérêt", description = "API de gestion des points d'intérêt (POI)")
 public class PointOfInterestController {
+
+    private static final Logger log = LoggerFactory.getLogger(PointOfInterestController.class);
 
         private final PointOfInterestPort poiService;
 

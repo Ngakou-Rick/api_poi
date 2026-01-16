@@ -1,15 +1,16 @@
 package com.poi.yow_point.application.service;
 
+import com.poi.yow_point.domain.model.AppUser;
 import com.poi.yow_point.infrastructure.mappers.AppUserMapper;
+import com.poi.yow_point.domain.ports.in.AppUserPort;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.validation.AppUserValidator;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.AppUserEntity;
 //import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.OrganizationRepository;
-import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryUser.AppUserRepository;
+import com.poi.yow_point.domain.ports.out.AppUserRepositoryPort;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.AppUserDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,6 @@ public class AppUserServiceImpl implements AppUserPort {
     private final AppUserValidator validationService;
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
     public AppUserServiceImpl(AppUserRepositoryPort appUserRepository,
             AppUserMapper appUserMapper,
             AppUserValidator validationService,
@@ -49,14 +49,24 @@ public class AppUserServiceImpl implements AppUserPort {
                     // Hasher le mot de passe
                     String hashedPassword = passwordEncoder.encode(appUserDTO.getPassword());
 
-                    // Créer l'entité avec le mot de passe hashé
-                    AppUserEntity appUser = appUserMapper.toEntity(appUserDTO);
-                    appUser.setPasswordHash(hashedPassword);
+                    // Créer l'entité domaine avec le mot de passe hashé
+                    AppUserEntity tempEntity = appUserMapper.toEntity(appUserDTO);
+                    AppUser appUser = new AppUser(
+                        null, // userId sera généré par la base
+                        tempEntity.getOrgId(),
+                        tempEntity.getUsername(),
+                        tempEntity.getEmail(),
+                        tempEntity.getPhone(),
+                        hashedPassword,
+                        tempEntity.getRole(),
+                        tempEntity.getIsActive(),
+                        tempEntity.getCreatedAt()
+                    );
 
                     return appUser;
                 }))
                 .flatMap(appUserRepository::save)
-                .doOnSuccess(savedUser -> log.info("Saved user with ID: {}", savedUser.getUserId()))
+                .doOnSuccess(savedUser -> log.info("Saved user with ID: {}", savedUser.userId()))
                 .map(appUserMapper::toDTO);
     }
 
@@ -69,18 +79,32 @@ public class AppUserServiceImpl implements AppUserPort {
                 .then(appUserRepository.findById(id))
                 .switchIfEmpty(Mono.error(new RuntimeException("User not found with id " + id)))
                 .flatMap(existingUser -> {
-                    // Mettre à jour les champs
-                    appUserMapper.updateFromDto(appUserDTO, existingUser);
+                    // Créer une entité temporaire pour la mise à jour
+                    AppUserEntity tempEntity = appUserMapper.toEntity(existingUser);
+                    appUserMapper.updateFromDto(appUserDTO, tempEntity);
 
                     // Hasher le nouveau mot de passe si fourni
+                    String passwordHash = existingUser.passwordHash();
                     if (appUserDTO.getPassword() != null && !appUserDTO.getPassword().trim().isEmpty()) {
-                        String hashedPassword = passwordEncoder.encode(appUserDTO.getPassword());
-                        existingUser.setPasswordHash(hashedPassword);
+                        passwordHash = passwordEncoder.encode(appUserDTO.getPassword());
                     }
 
-                    return appUserRepository.save(existingUser);
+                    // Créer le nouvel AppUser avec les données mises à jour
+                    AppUser updatedUser = new AppUser(
+                        existingUser.userId(),
+                        tempEntity.getOrgId(),
+                        tempEntity.getUsername(),
+                        tempEntity.getEmail(),
+                        tempEntity.getPhone(),
+                        passwordHash,
+                        tempEntity.getRole(),
+                        tempEntity.getIsActive(),
+                        tempEntity.getCreatedAt()
+                    );
+
+                    return appUserRepository.save(updatedUser);
                 })
-                .doOnSuccess(updatedUser -> log.info("Updated user with ID: {}", updatedUser.getUserId()))
+                .doOnSuccess(updatedUser -> log.info("Updated user with ID: {}", updatedUser.userId()))
                 .map(appUserMapper::toDTO);
     }
 

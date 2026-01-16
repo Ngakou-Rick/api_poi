@@ -6,6 +6,8 @@ import com.poi.yow_point.application.service.PoiEventPublisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 //import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -13,9 +15,9 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Mono;
 
 @Component
-@Slf4j
-@RequiredArgsConstructor
 public class PoiWebSocketHandler implements WebSocketHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(PoiWebSocketHandler.class);
 
     private final PoiEventPublisher eventPublisher;
     private final ObjectMapper objectMapper;

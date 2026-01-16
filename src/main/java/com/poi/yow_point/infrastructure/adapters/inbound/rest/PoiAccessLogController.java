@@ -1,10 +1,12 @@
 package com.poi.yow_point.infrastructure.adapters.inbound.rest;
 
-import com.poi.yow_point.domain.ports.in.*;
+import com.poi.yow_point.domain.ports.in.PoiAccessLogPort;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiAccessLogDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,14 +28,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/poi-access-logs")
 @RequiredArgsConstructor
 @Tag(name = "POI Access Logs", description = "API for managing Point of Interest access logs")
 public class PoiAccessLogController {
 
-        private final PoiAccessLogPort service;
+    private static final Logger log = LoggerFactory.getLogger(PoiAccessLogController.class);
+
+    private final PoiAccessLogPort service;
 
         @Operation(summary = "Create access log", description = "Creates a new access log entry")
         @ApiResponses(value = {

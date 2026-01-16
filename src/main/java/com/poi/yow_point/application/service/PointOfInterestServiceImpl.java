@@ -2,16 +2,15 @@ package com.poi.yow_point.application.service;
 import com.poi.yow_point.domain.ports.in.*;
 
 import com.poi.yow_point.infrastructure.mappers.PointOfInterestMapper;
-import com.poi.yow_point.application.service.PointOfInterestService;
-import com.poi.yow_point.application.service.PoiEventPublisher;
+import com.poi.yow_point.domain.ports.in.PointOfInterestPort;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.validation.PointOfInterestValidator;
-import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.PointOfInterestEntity;
-import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PointOfInterestEntity.PointOfInterestRepository;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PointOfInterestDTO;
-import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.websocketDTO.PoiEvent;
+import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.websocket.PoiEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -24,8 +23,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class PointOfInterestServiceImpl implements PointOfInterestPort {
+
+    private static final Logger log = LoggerFactory.getLogger(PointOfInterestServiceImpl.class);
 
     private final PointOfInterestRepository repository;
     private final PointOfInterestMapper mapper;

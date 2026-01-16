@@ -1,5 +1,6 @@
 package com.poi.yow_point.infrastructure.mappers;
 
+import com.poi.yow_point.domain.model.AppUser;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.AppUserEntity;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.AppUserDTO;
 
@@ -32,9 +33,17 @@ public interface AppUserMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateFromDto(AppUserDTO dto, @MappingTarget AppUserEntity entity);
 
-    // Mapping spécifique pour la création avec mot de passe
+    // Mapping pour la création avec mot de passe
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "passwordHash", source = "passwordHash")
     AppUserEntity toEntityWithPassword(AppUserDTO appUserDTO, String passwordHash);
+
+    // Mapping entre AppUser (domain) et DTO
+    @Mapping(target = "password", ignore = true)
+    AppUserDTO toDTO(AppUser appUser);
+    @Mapping(target = "passwordHash", source = "passwordHash")
+    AppUser toDomain(AppUserEntity entity);
+    @Mapping(target = "passwordHash", source = "passwordHash")
+    AppUserEntity toEntity(AppUser appUser);
 }

@@ -1,14 +1,15 @@
 package com.poi.yow_point.application.service;
 
 import com.poi.yow_point.infrastructure.mappers.PoiReviewMapper;
-import com.poi.yow_point.application.service.PoiReviewService;
+import com.poi.yow_point.domain.ports.in.PoiReviewService;
 import com.poi.yow_point.application.service.PoiEventPublisher;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.PoiReviewEntity;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryReview.PoiReviewRepository;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiReviewDTO;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.validation.PoiReviewValidator;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +20,11 @@ import reactor.core.publisher.Mono;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
-public class PoiReviewServiceImpl implements PoiReviewPort {
+public class PoiReviewServiceImpl implements PoiReviewService {
+
+    private static final Logger log = LoggerFactory.getLogger(PoiReviewServiceImpl.class);
 
     private final PoiReviewRepository poiReviewRepository;
     private final PoiReviewMapper poiReviewMapper;

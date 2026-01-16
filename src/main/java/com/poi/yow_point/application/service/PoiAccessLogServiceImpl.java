@@ -1,13 +1,16 @@
 package com.poi.yow_point.application.service;
 
 import com.poi.yow_point.infrastructure.mappers.PoiAccessLogMapper;
-import com.poi.yow_point.application.service.PoiAccessLogService;
+import com.poi.yow_point.domain.ports.in.PoiAccessLogPort;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.validation.PoiAccessLogValidator;
 //import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.PoiAccessLogEntity;
-import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repositoryAccessLog.PoiAccessLogRepository;
+import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PoiAccessLogRepository;
+import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PoiAccessLogRepositoryCustom;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiAccessLogDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -17,10 +20,11 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
-public class PoiAccessLogServiceImpl implements PoiAccessLogPort {
+public class PoiAccessLogServiceImpl implements PoiAccessLogServicePort {
+
+    private static final Logger log = LoggerFactory.getLogger(PoiAccessLogServiceImpl.class);
 
     private final PoiAccessLogRepository repository;
     private final PoiAccessLogMapper mapper;

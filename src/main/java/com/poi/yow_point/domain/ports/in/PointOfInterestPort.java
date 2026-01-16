@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
-public interface PointOfInterestService {
+public interface PointOfInterestPort {
     Mono<PointOfInterestDTO> createPoi(PointOfInterestDTO dto);
 
     Mono<PointOfInterestDTO> updatePoi(UUID poiId, PointOfInterestDTO dto);
