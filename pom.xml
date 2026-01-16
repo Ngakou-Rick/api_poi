@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.0</version>
+		<version>3.2.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.poi</groupId>
@@ -87,6 +87,29 @@
 		<dependency>
     		<groupId>io.r2dbc</groupId>
     		<artifactId>r2dbc-spi</artifactId>
+		</dependency>
+
+		<!-- Redis Reactive -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+		</dependency>
+
+		<!-- Kafka Reactive -->
+		<dependency>
+			<groupId>io.projectreactor.kafka</groupId>
+			<artifactId>reactor-kafka</artifactId>
+		</dependency>
+
+		<!-- Resilience4j -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot3</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 
 		<!-- Jackson pour JSON -->

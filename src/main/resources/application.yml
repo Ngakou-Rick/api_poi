@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: yow_point
+  r2dbc:
+    url: r2dbc:postgresql://168.119.122.86:5432/yowyob_poi
+    username: postgres
+    password: postgres
+  data:
+    redis:
+      host: 168.119.122.86
+      port: 7000
+  kafka:
+    bootstrap-servers: 168.119.122.86:9092
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      stockService:
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+
+logging:
+  level:
+    com.poi.yow_point: DEBUG
