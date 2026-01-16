@@ -1,0 +1,71 @@
+package com.poi.yow_point.infrastructure.adapters.inbound.rest.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.*;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AppUserDTO {
+
+    private UUID userId;
+
+    @NotNull(message = "Organization ID is required")
+    private UUID orgId;
+
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9_.-]+$", message = "Username can only contain letters, numbers, dots, hyphens and underscores")
+    private String username;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    @Size(max = 100, message = "Email must not exceed 100 characters")
+    private String email;
+
+    @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Phone number must be between 10 and 15 digits")
+    private String phone;
+
+    // Champ pour le mot de passe en clair (seulement pour les opérations
+    // d'écriture)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Password must contain at least one lowercase letter, one uppercase letter, one digit and one special character")
+    private String password;
+
+    @NotBlank(message = "Role is required")
+    @Pattern(regexp = "^(USER|ADMIN|SUPER_ADMIN)$", message = "Role must be USER, ADMIN or SUPER_ADMIN")
+    private String role;
+
+    @Builder.Default
+    private Boolean isActive = true;
+
+    private OffsetDateTime createdAt;
+
+    // Getters and Setters
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
+    public UUID getOrgId() { return orgId; }
+    public void setOrgId(UUID orgId) { this.orgId = orgId; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+}

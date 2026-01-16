@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.0</version>
+		<version>3.2.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.poi</groupId>
@@ -89,6 +89,35 @@
     		<artifactId>r2dbc-spi</artifactId>
 		</dependency>
 
+		<!-- Redis Reactive -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+		</dependency>
+
+		<!-- Kafka Reactive -->
+		<dependency>
+			<groupId>io.projectreactor.kafka</groupId>
+			<artifactId>reactor-kafka</artifactId>
+		</dependency>
+
+		<!-- Elasticsearch Reactive -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+		</dependency>
+
+		<!-- Resilience4j -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot3</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+
 		<!-- Jackson pour JSON -->
 		<dependency>
     		<groupId>com.fasterxml.jackson.core</groupId>
@@ -136,13 +165,6 @@
     	</dependency>
 		<!-- Ajout du processeur MapStruct comme dépendance pour s'assurer qu'il est disponible -->
 		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct-processor</artifactId>
-			<version>${org.mapstruct.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -165,17 +187,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<!-- La version du plugin peut être gérée par le parent ou spécifiée, ex: 3.11.0 ou 3.8.1 -->
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
-					<!-- Configuration des processeurs d'annotations ici -->
 					<annotationProcessorPaths>
-						<path>
-							<groupId>org.mapstruct</groupId>
-							<artifactId>mapstruct-processor</artifactId>
-							<version>${org.mapstruct.version}</version>
-						</path>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
@@ -184,10 +199,14 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok-mapstruct-binding</artifactId>
-							<version>0.2.0</version> <!-- Ou la dernière version -->
+							<version>0.2.0</version>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${org.mapstruct.version}</version>
 						</path>
 					</annotationProcessorPaths>
-					<!-- Activer le componentModel spring pour MapStruct -->
 					<compilerArgs>
 						<arg>-Amapstruct.defaultComponentModel=spring</arg>
 					</compilerArgs>
@@ -223,15 +242,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<!-- La configuration des annotationProcessorPaths n'a pas sa place ici -->
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

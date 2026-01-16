@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: yow_point
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:168.119.122.86}:5432/yowyob_poi
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  data:
+    redis:
+      host: ${REDIS_HOST:168.119.122.86}
+      port: ${REDIS_PORT:7000}
+    elasticsearch:
+      cluster-nodes: ${ES_HOST:168.119.122.86}:9200
+  elasticsearch:
+    uris: http://${ES_HOST:168.119.122.86}:9200
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:168.119.122.86}:9092
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      stockService:
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+
+logging:
+  level:
+    com.poi.yow_point: DEBUG
