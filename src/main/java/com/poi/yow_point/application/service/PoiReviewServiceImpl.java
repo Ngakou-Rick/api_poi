@@ -1,7 +1,7 @@
 package com.poi.yow_point.application.service;
 
 import com.poi.yow_point.infrastructure.mappers.PoiReviewMapper;
-import com.poi.yow_point.domain.ports.in.PoiReviewService;
+import com.poi.yow_point.domain.ports.in.PoiReviewPort;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.entity.PoiReviewEntity;
 import com.poi.yow_point.infrastructure.adapters.outbound.persistence.repository.PoiReviewRepository;
 import com.poi.yow_point.infrastructure.adapters.inbound.rest.dto.PoiReviewDTO;
@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class PoiReviewServiceImpl implements PoiReviewService {
+public class PoiReviewServiceImpl implements PoiReviewPort {
 
     private static final Logger log = LoggerFactory.getLogger(PoiReviewServiceImpl.class);
 

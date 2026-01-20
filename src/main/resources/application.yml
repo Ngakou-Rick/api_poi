@@ -1,21 +1,36 @@
 server:
   port: 8080
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
 spring:
   application:
     name: yow_point
+  main:
+    allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   r2dbc:
-    url: r2dbc:postgresql://${DB_HOST:168.119.122.86}:5432/yowyob_poi
+    url: r2dbc:postgresql://${DB_HOST:localhost}:5433/yowyob_poi
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
   data:
     redis:
-      host: ${REDIS_HOST:168.119.122.86}
-      port: ${REDIS_PORT:7000}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   elasticsearch:
-    uris: http://${ES_HOST:168.119.122.86}:9200
+    uris: http://${ES_HOST:localhost}:9200
   kafka:
-    bootstrap-servers: ${KAFKA_HOST:168.119.122.86}:9092
+    bootstrap-servers: ${KAFKA_HOST:localhost}:9092
   sql:
     init:
       mode: always
