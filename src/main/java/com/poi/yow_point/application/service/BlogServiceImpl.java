@@ -49,7 +49,7 @@ public class BlogServiceImpl implements BlogPort {
                     existing.setTitle(blogDTO.getTitle());
                     existing.setContent(blogDTO.getContent());
                     existing.setImageUrl(blogDTO.getImageUrl());
-                    existing.setTags(blogDTO.getTags());
+                    existing.setTags(mapper.listToString(blogDTO.getTags()));
                     existing.setUpdatedAt(OffsetDateTime.now());
                     return repository.save(existing);
                 })

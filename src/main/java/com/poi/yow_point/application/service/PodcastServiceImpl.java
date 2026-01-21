@@ -51,7 +51,7 @@ public class PodcastServiceImpl implements PodcastPort {
                     existing.setAudioUrl(podcastDTO.getAudioUrl());
                     existing.setDuration(podcastDTO.getDuration());
                     existing.setImageUrl(podcastDTO.getImageUrl());
-                    existing.setTags(podcastDTO.getTags());
+                    existing.setTags(mapper.listToString(podcastDTO.getTags()));
                     existing.setUpdatedAt(OffsetDateTime.now());
                     return repository.save(existing);
                 })
