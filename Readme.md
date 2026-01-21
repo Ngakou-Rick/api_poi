@@ -17,13 +17,34 @@ This project is a reactive microservice for managing Points of Interest, built w
 - MapStruct & Lombok
 
 ## Getting Started
-### Local Build
+
+### 1. Database and Environment (Docker)
+This project requires PostgreSQL (with PostGIS), Redis, Kafka, and Elasticsearch.
+The easiest way to start them is via Docker Compose:
+
 ```bash
-mvn clean install
-mvn spring-boot:run
+docker-compose up -d
 ```
 
-### Docker
+**Note sur le port PostgreSQL :** Le projet est configuré pour se connecter sur le port **5433** (configuré dans `docker-compose.yml` pour éviter les conflits avec une instance locale).
+
+### 2. Backend (Spring Boot)
+Une fois les conteneurs démarrés :
+```bash
+./mvnw clean spring-boot:run
+```
+Le backend tourne sur `http://localhost:8080`.
+
+### 3. Frontend (Next.js)
+Dans un autre terminal :
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Le frontend tourne sur `http://localhost:3000`.
+
+### Docker (App complète)
 ```bash
 docker build -t yow-point .
 docker run -p 8080:8080 yow-point
