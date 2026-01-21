@@ -243,6 +243,37 @@ ORDER BY
 -- 10. Conseils de maintenance
 -- REFRESH MATERIALIZED VIEW mv_stats_poi_access_by_platform_org;
 -- REFRESH MATERIALIZED VIEW mv_stats_poi_reviews_by_platform_org;
+-- 11. Table pour les blogs
+CREATE TABLE IF NOT EXISTS blog (
+    blog_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    author_id UUID REFERENCES app_user(user_id),
+    image_url TEXT,
+    tags TEXT[],
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 12. Table pour les podcasts
+CREATE TABLE IF NOT EXISTS podcast (
+    podcast_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title TEXT NOT NULL,
+    description TEXT,
+    audio_url TEXT NOT NULL,
+    duration INT, -- en secondes
+    author_id UUID REFERENCES app_user(user_id),
+    image_url TEXT,
+    tags TEXT[],
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 13. Index pour blogs et podcasts
+CREATE INDEX IF NOT EXISTS idx_blog_author ON blog (author_id);
+CREATE INDEX IF NOT EXISTS idx_podcast_author ON podcast (author_id);
+
+-- 14. Conseils de maintenance
 -- REFRESH MATERIALIZED VIEW mv_poi_by_type;
 -- REFRESH MATERIALIZED VIEW mv_poi_by_category;
 -- REFRESH MATERIALIZED VIEW mv_poi_by_popularity;

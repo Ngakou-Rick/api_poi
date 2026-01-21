@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/v1/poi-access-logs")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", maxAge = 3600)
 @Tag(name = "POI Access Logs", description = "API for managing Point of Interest access logs")
 public class PoiAccessLogController {
 

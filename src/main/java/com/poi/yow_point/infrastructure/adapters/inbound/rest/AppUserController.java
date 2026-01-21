@@ -27,6 +27,7 @@ import jakarta.validation.constraints.Email;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @Tag(name = "User API", description = "APIs for managing application users")
 @Validated
 public class AppUserController {

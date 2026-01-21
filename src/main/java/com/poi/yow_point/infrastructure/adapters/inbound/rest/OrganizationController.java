@@ -24,6 +24,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/organizations")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @Tag(name = "Organization API", description = "APIs for managing organizations")
 public class OrganizationController {
 

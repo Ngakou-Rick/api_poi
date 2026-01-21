@@ -138,3 +138,32 @@ CREATE INDEX IF NOT EXISTS idx_poi_review_org ON poi_review (organization_id);
 CREATE INDEX IF NOT EXISTS idx_stat_org_platform ON poi_platform_stat (org_id, platform_type, stat_date);
 
 CREATE INDEX IF NOT EXISTS idx_poi_location_geog   ON point_of_interest USING GIST (location_geog);
+
+-- Table pour les blogs
+CREATE TABLE IF NOT EXISTS blog (
+    blog_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    author_id UUID REFERENCES app_user(user_id),
+    image_url TEXT,
+    tags TEXT, -- Stocké comme texte séparé par virgules
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Table pour les podcasts
+CREATE TABLE IF NOT EXISTS podcast (
+    podcast_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title TEXT NOT NULL,
+    description TEXT,
+    audio_url TEXT NOT NULL,
+    duration INT,
+    author_id UUID REFERENCES app_user(user_id),
+    image_url TEXT,
+    tags TEXT, -- Stocké comme texte séparé par virgules
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_blog_author ON blog (author_id);
+CREATE INDEX IF NOT EXISTS idx_podcast_author ON podcast (author_id);
