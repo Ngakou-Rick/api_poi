@@ -16,6 +16,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/blogs")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", maxAge = 3600)
 @Tag(name = "Blog API", description = "Endpoints for managing blog posts")
 public class BlogController {
 

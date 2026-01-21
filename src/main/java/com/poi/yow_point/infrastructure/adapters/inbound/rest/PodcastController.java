@@ -16,6 +16,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/podcasts")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", maxAge = 3600)
 @Tag(name = "Podcast API", description = "Endpoints for managing podcasts")
 public class PodcastController {
 

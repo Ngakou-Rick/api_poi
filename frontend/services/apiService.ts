@@ -86,22 +86,28 @@ const mapFrontendToBackendPoi = (frontendPoi: Partial<POI>, orgId: string, userI
 export const apiService = {
   // POIs
   getAllPois: async (): Promise<POI[]> => {
-    const response = await fetch(`${API_BASE_URL}/pois`);
+    const url = `${API_BASE_URL}/pois`;
+    console.log(`Calling API: ${url}`);
+    const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to fetch POIs");
     const data = await response.json();
     return data.map(mapBackendToFrontendPoi);
   },
 
   getPoiById: async (id: string): Promise<POI> => {
-    const response = await fetch(`${API_BASE_URL}/pois/${id}`);
+    const url = `${API_BASE_URL}/pois/${id}`;
+    console.log(`Calling API: ${url}`);
+    const response = await fetch(url);
     if (!response.ok) throw new Error("POI not found");
     const data = await response.json();
     return mapBackendToFrontendPoi(data);
   },
 
   createPoi: async (poi: Partial<POI>, orgId: string, userId: string): Promise<POI> => {
+    const url = `${API_BASE_URL}/pois`;
+    console.log(`Calling API: ${url}`);
     const backendData = mapFrontendToBackendPoi(poi, orgId, userId);
-    const response = await fetch(`${API_BASE_URL}/pois`, {
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(backendData),
@@ -113,13 +119,17 @@ export const apiService = {
 
   // Blogs
   getAllBlogs: async (): Promise<Blog[]> => {
-    const response = await fetch(`${API_BASE_URL}/blogs`);
+    const url = `${API_BASE_URL}/blogs`;
+    console.log(`Calling API: ${url}`);
+    const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to fetch blogs");
     return response.json();
   },
 
   createBlog: async (blog: Partial<Blog>): Promise<Blog> => {
-    const response = await fetch(`${API_BASE_URL}/blogs`, {
+    const url = `${API_BASE_URL}/blogs`;
+    console.log(`Calling API: ${url}`);
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(blog),
@@ -129,13 +139,17 @@ export const apiService = {
 
   // Podcasts
   getAllPodcasts: async (): Promise<Podcast[]> => {
-    const response = await fetch(`${API_BASE_URL}/podcasts`);
+    const url = `${API_BASE_URL}/podcasts`;
+    console.log(`Calling API: ${url}`);
+    const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to fetch podcasts");
     return response.json();
   },
 
   createPodcast: async (podcast: Partial<Podcast>): Promise<Podcast> => {
-    const response = await fetch(`${API_BASE_URL}/podcasts`, {
+    const url = `${API_BASE_URL}/podcasts`;
+    console.log(`Calling API: ${url}`);
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(podcast),
@@ -157,7 +171,9 @@ export const apiService = {
 
   // Reviews
   getReviewsByPoiId: async (poiId: string) => {
-    const response = await fetch(`http://localhost:8080/api/reviews/poi/${poiId}`);
+    const baseUrl = API_BASE_URL.replace("/v1", ""); // Go back to /api
+    const response = await fetch(`${baseUrl}/reviews/poi/${poiId}`);
+    if (!response.ok) throw new Error("Failed to fetch reviews");
     return response.json();
   }
 };
