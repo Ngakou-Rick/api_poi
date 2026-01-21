@@ -32,6 +32,14 @@ public class PointOfInterestServiceImpl implements PointOfInterestPort {
     private final PoiEventPublisher eventPublisher;
 
     @Override
+    public Flux<PointOfInterestDTO> findAll() {
+        return repository.findAll()
+                .map(mapper::toDto)
+                .doOnComplete(() -> log.debug("Retrieved all POIs"))
+                .doOnError(error -> log.error("Error retrieving all POIs: {}", error.getMessage()));
+    }
+
+    @Override
     @Transactional
     public Mono<PointOfInterestDTO> createPoi(PointOfInterestDTO dto) {
         return validateDto(dto)

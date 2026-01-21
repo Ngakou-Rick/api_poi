@@ -8,6 +8,8 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 public interface PointOfInterestPort {
+    Flux<PointOfInterestDTO> findAll();
+
     Mono<PointOfInterestDTO> createPoi(PointOfInterestDTO dto);
 
     Mono<PointOfInterestDTO> updatePoi(UUID poiId, PointOfInterestDTO dto);
