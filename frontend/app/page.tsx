@@ -10,6 +10,7 @@ import { SecondarySidebar } from "@/components/sidebar/SecondarySidebar";
 import { POI_DATA } from "@/data/mockData";
 import { POI, Location, TransportMode } from "@/types";
 import { getRoute } from "@/services/routingService";
+import { apiService } from "@/services/apiService";
 import { useUserData } from "@/hooks/useUserData";
 import { Settings as SettingsIcon, Check, X } from "lucide-react";
 import { Loader } from "@/components/ui/Loader";
@@ -37,6 +38,7 @@ export default function Home() {
 
   const { savedPois, recentPois, recentTrips, mapStyle, addRecentPoi, addTrip, toggleMapStyle, myPois } = useUserData();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [pois, setPois] = useState<POI[]>([]);
 
   // États transverses
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,6 +58,14 @@ export default function Home() {
             err => console.warn(err)
         );
      }
+
+     // Fetch real POIs
+     apiService.getAllPois()
+       .then(setPois)
+       .catch(err => {
+         console.warn("Could not fetch POIs from API, using mock data.", err);
+         setPois(POI_DATA);
+       });
   }, []);
 
   // --- GESTIONNAIRES D'AFFICHAGE ---
@@ -138,7 +148,7 @@ export default function Home() {
 
 
   const filteredPois = useMemo(() => {
-    const base = [...POI_DATA, ...myPois]; // Fusion
+    const base = pois.length > 0 ? [...pois, ...myPois] : [...POI_DATA, ...myPois]; // Fusion
     return base.filter((poi) => {
       const cat = selectedCategory ? poi.poi_category === selectedCategory : true;
       const search = searchQuery ? poi.poi_name.toLowerCase().includes(searchQuery.toLowerCase()) : true;

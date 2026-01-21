@@ -8,7 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -23,7 +22,7 @@ public class BlogEntity {
     private String content;
     private UUID authorId;
     private String imageUrl;
-    private List<String> tags;
+    private String tags; // Store as comma-separated string
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }

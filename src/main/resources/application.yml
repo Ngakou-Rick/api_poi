@@ -20,7 +20,7 @@ spring:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
       - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   r2dbc:
-    url: r2dbc:postgresql://${DB_HOST:localhost}:5433/yowyob_poi
+    url: r2dbc:postgresql://${DB_HOST:localhost}:5432/yowyob_poi
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
   data:

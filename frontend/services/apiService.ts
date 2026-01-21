@@ -84,14 +84,27 @@ const mapFrontendToBackendPoi = (frontendPoi: Partial<POI>, orgId: string, userI
 };
 
 export const apiService = {
+  // Health check
+  checkHealth: async () => {
+    const url = `${API_BASE_URL}/health`;
+    console.log(`Checking health: ${url}`);
+    const response = await fetch(url);
+    return response.json();
+  },
+
   // POIs
   getAllPois: async (): Promise<POI[]> => {
     const url = `${API_BASE_URL}/pois`;
     console.log(`Calling API: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch POIs");
-    const data = await response.json();
-    return data.map(mapBackendToFrontendPoi);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Status ${response.status}: ${response.statusText}`);
+      const data = await response.json();
+      return data.map(mapBackendToFrontendPoi);
+    } catch (err) {
+      console.error("Failed to fetch POIs", err);
+      throw err;
+    }
   },
 
   getPoiById: async (id: string): Promise<POI> => {
@@ -121,9 +134,17 @@ export const apiService = {
   getAllBlogs: async (): Promise<Blog[]> => {
     const url = `${API_BASE_URL}/blogs`;
     console.log(`Calling API: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch blogs");
-    return response.json();
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch blogs: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+      return response.json();
+    } catch (error: any) {
+      console.error("API Error (getAllBlogs):", error);
+      throw error;
+    }
   },
 
   createBlog: async (blog: Partial<Blog>): Promise<Blog> => {
@@ -141,9 +162,17 @@ export const apiService = {
   getAllPodcasts: async (): Promise<Podcast[]> => {
     const url = `${API_BASE_URL}/podcasts`;
     console.log(`Calling API: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch podcasts");
-    return response.json();
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch podcasts: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+      return response.json();
+    } catch (error: any) {
+      console.error("API Error (getAllPodcasts):", error);
+      throw error;
+    }
   },
 
   createPodcast: async (podcast: Partial<Podcast>): Promise<Podcast> => {
