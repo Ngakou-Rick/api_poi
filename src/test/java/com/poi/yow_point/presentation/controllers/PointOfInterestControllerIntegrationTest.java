@@ -46,6 +46,9 @@ class PointOfInterestControllerIntegrationTest {
     @MockBean
     private KafkaProducerService kafkaProducerService;
 
+    @MockBean
+    private org.springframework.data.redis.core.ReactiveRedisTemplate<String, PointOfInterestDTO> redisTemplate;
+
     private PointOfInterestDTO testPoiDto;
     private final UUID organizationId = UUID.randomUUID();
     private final GeometryFactory geometryFactory = new GeometryFactory();
@@ -104,6 +107,13 @@ class PointOfInterestControllerIntegrationTest {
 
         // Mock deleteById
         Mockito.when(pointOfInterestRepository.deleteById(poiId)).thenReturn(Mono.empty());
+
+        // Mock Redis Template
+        org.springframework.data.redis.core.ReactiveValueOperations<String, PointOfInterestDTO> opsForValue = Mockito.mock(org.springframework.data.redis.core.ReactiveValueOperations.class);
+        Mockito.when(redisTemplate.opsForValue()).thenReturn(opsForValue);
+        Mockito.when(opsForValue.get(any())).thenReturn(Mono.empty());
+        Mockito.when(opsForValue.set(any(), any(), any())).thenReturn(Mono.just(true));
+        Mockito.when(opsForValue.delete(any())).thenReturn(Mono.just(true));
 
 
         // 1. Create POI
