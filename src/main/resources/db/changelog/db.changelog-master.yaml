@@ -1,0 +1,698 @@
+databaseChangeLog:
+  - property:
+      name: uuid.type
+      value: UUID
+  - property:
+      name: uuid.function
+      value: uuid_generate_v4()
+      dbms: postgresql
+  - property:
+      name: uuid.function
+      value: random_uuid()
+      dbms: h2
+  - property:
+      name: now.function
+      value: NOW()
+      dbms: postgresql
+  - property:
+      name: now.function
+      value: CURRENT_TIMESTAMP
+      dbms: h2
+  - property:
+      name: spatial.type
+      value: GEOGRAPHY(Point, 4326)
+      dbms: postgresql
+  - property:
+      name: spatial.type
+      value: VARCHAR(255)
+      dbms: h2
+  - property:
+      name: json.type
+      value: JSON
+      dbms: postgresql
+  - property:
+      name: json.type
+      value: CLOB
+      dbms: h2
+  - property:
+      name: indexed_text.type
+      value: TEXT
+      dbms: postgresql
+  - property:
+      name: indexed_text.type
+      value: VARCHAR(255)
+      dbms: h2
+
+  - changeSet:
+      id: 01-initial-extensions
+      author: jules
+      dbms: postgresql
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS postgis;
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+  - changeSet:
+      id: 02-create-organization-table
+      author: jules
+      changes:
+        - createTable:
+            tableName: organization
+            columns:
+              - column:
+                  name: organization_id
+                  type: ${uuid.type}
+                  defaultValueComputed: ${uuid.function}
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: org_name
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: org_code
+                  type: ${indexed_text.type}
+                  constraints:
+                    unique: true
+              - column:
+                  name: org_type
+                  type: ${indexed_text.type}
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+
+  - changeSet:
+      id: 03-create-app_user-table
+      author: jules
+      changes:
+        - createTable:
+            tableName: app_user
+            columns:
+              - column:
+                  name: user_id
+                  type: ${uuid.type}
+                  defaultValueComputed: ${uuid.function}
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: organization_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: organization
+                    referencedColumnNames: organization_id
+                    foreignKeyName: fk_user_org
+                    deleteCascade: true
+              - column:
+                  name: username
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: ${indexed_text.type}
+              - column:
+                  name: phone
+                  type: ${indexed_text.type}
+              - column:
+                  name: password_hash
+                  type: TEXT
+              - column:
+                  name: role
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+
+  - changeSet:
+      id: 04-create-point_of_interest-table
+      author: jules
+      changes:
+        - createTable:
+            tableName: point_of_interest
+            columns:
+              - column:
+                  name: poi_id
+                  type: ${uuid.type}
+                  defaultValueComputed: ${uuid.function}
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: organization_id
+                  type: ${uuid.type}
+                  constraints:
+                    referencedTableName: organization
+                    referencedColumnNames: organization_id
+                    foreignKeyName: fk_poi_org
+              - column:
+                  name: town_id
+                  type: ${uuid.type}
+              - column:
+                  name: created_by_user_id
+                  type: ${uuid.type}
+                  constraints:
+                    referencedTableName: app_user
+                    referencedColumnNames: user_id
+                    foreignKeyName: fk_poi_creator
+              - column:
+                  name: poi_name
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: poi_type
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: poi_category
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: poi_long_name
+                  type: TEXT
+              - column:
+                  name: poi_short_name
+                  type: TEXT
+              - column:
+                  name: poi_friendly_name
+                  type: TEXT
+              - column:
+                  name: poi_description
+                  type: TEXT
+              - column:
+                  name: poi_logo
+                  type: BYTEA
+              - column:
+                  name: location_geog
+                  type: ${spatial.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address_street_number
+                  type: ${indexed_text.type}
+              - column:
+                  name: address_street_name
+                  type: ${indexed_text.type}
+              - column:
+                  name: address_city
+                  type: ${indexed_text.type}
+              - column:
+                  name: address_state_province
+                  type: ${indexed_text.type}
+              - column:
+                  name: address_postal_code
+                  type: ${indexed_text.type}
+              - column:
+                  name: address_country
+                  type: ${indexed_text.type}
+              - column:
+                  name: address_informal
+                  type: TEXT
+              - column:
+                  name: website_url
+                  type: TEXT
+              - column:
+                  name: operation_time_plan
+                  type: ${json.type}
+              - column:
+                  name: poi_contacts
+                  type: ${json.type}
+              - column:
+                  name: poi_images_urls
+                  type: TEXT
+              - column:
+                  name: poi_amenities
+                  type: TEXT
+              - column:
+                  name: poi_keywords
+                  type: TEXT
+              - column:
+                  name: poi_type_tags
+                  type: TEXT
+              - column:
+                  name: popularity_score
+                  type: FLOAT
+                  defaultValueNumeric: 0
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: deactivation_reason
+                  type: TEXT
+              - column:
+                  name: deactivated_by_user_id
+                  type: ${uuid.type}
+                  constraints:
+                    referencedTableName: app_user
+                    referencedColumnNames: user_id
+                    foreignKeyName: fk_poi_deactivator
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+              - column:
+                  name: updated_by_user_id
+                  type: ${uuid.type}
+                  constraints:
+                    referencedTableName: app_user
+                    referencedColumnNames: user_id
+                    foreignKeyName: fk_poi_updater
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+
+  - changeSet:
+      id: 05-create-poi-indexes
+      author: jules
+      changes:
+        - createIndex:
+            tableName: point_of_interest
+            indexName: idx_poi_org_id
+            columns:
+              - column:
+                  name: organization_id
+        - createIndex:
+            tableName: point_of_interest
+            indexName: idx_poi_type
+            columns:
+              - column:
+                  name: poi_type
+        - createIndex:
+            tableName: point_of_interest
+            indexName: idx_poi_category
+            columns:
+              - column:
+                  name: poi_category
+        - createIndex:
+            tableName: point_of_interest
+            indexName: idx_poi_name
+            columns:
+              - column:
+                  name: poi_name
+        - createIndex:
+            tableName: point_of_interest
+            indexName: idx_poi_is_active
+            columns:
+              - column:
+                  name: is_active
+        - sql:
+            dbms: postgresql
+            sql: CREATE INDEX idx_poi_location_geog ON point_of_interest USING GIST (location_geog);
+
+  - changeSet:
+      id: 06-create-poi_access_log-table
+      author: jules
+      changes:
+        - createTable:
+            tableName: poi_access_log
+            columns:
+              - column:
+                  name: access_id
+                  type: ${uuid.type}
+                  defaultValueComputed: ${uuid.function}
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: poi_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: point_of_interest
+                    referencedColumnNames: poi_id
+                    foreignKeyName: fk_access_poi
+                    deleteCascade: true
+              - column:
+                  name: organization_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: organization
+                    referencedColumnNames: organization_id
+                    foreignKeyName: fk_access_org
+                    deleteCascade: true
+              - column:
+                  name: platform_type
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: ${uuid.type}
+                  constraints:
+                    referencedTableName: app_user
+                    referencedColumnNames: user_id
+                    foreignKeyName: fk_access_user
+              - column:
+                  name: access_type
+                  type: ${indexed_text.type}
+              - column:
+                  name: access_datetime
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+              - column:
+                  name: metadata
+                  type: ${json.type}
+
+  - changeSet:
+      id: 07-create-poi_review-table
+      author: jules
+      changes:
+        - createTable:
+            tableName: poi_review
+            columns:
+              - column:
+                  name: review_id
+                  type: ${uuid.type}
+                  defaultValueComputed: ${uuid.function}
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: poi_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: point_of_interest
+                    referencedColumnNames: poi_id
+                    foreignKeyName: fk_review_poi
+                    deleteCascade: true
+              - column:
+                  name: user_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: app_user
+                    referencedColumnNames: user_id
+                    foreignKeyName: fk_review_user
+              - column:
+                  name: organization_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: organization
+                    referencedColumnNames: organization_id
+                    foreignKeyName: fk_review_org
+                    deleteCascade: true
+              - column:
+                  name: platform_type
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rating
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: review_text
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+              - column:
+                  name: likes
+                  type: INT
+                  defaultValueNumeric: 0
+              - column:
+                  name: dislikes
+                  type: INT
+                  defaultValueNumeric: 0
+        - sql:
+            sql: ALTER TABLE poi_review ADD CONSTRAINT chk_poi_review_rating CHECK (rating >= 1 AND rating <= 5)
+
+  - changeSet:
+      id: 08-create-poi_platform_stat-table
+      author: jules
+      changes:
+        - createTable:
+            tableName: poi_platform_stat
+            columns:
+              - column:
+                  name: stat_id
+                  type: ${uuid.type}
+                  defaultValueComputed: ${uuid.function}
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: org_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: organization
+                    referencedColumnNames: organization_id
+                    foreignKeyName: fk_stat_org
+                    deleteCascade: true
+              - column:
+                  name: poi_id
+                  type: ${uuid.type}
+                  constraints:
+                    referencedTableName: point_of_interest
+                    referencedColumnNames: poi_id
+                    foreignKeyName: fk_stat_poi
+                    deleteCascade: true
+              - column:
+                  name: platform_type
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stat_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: views
+                  type: INT
+                  defaultValueNumeric: 0
+              - column:
+                  name: reviews
+                  type: INT
+                  defaultValueNumeric: 0
+              - column:
+                  name: likes
+                  type: INT
+                  defaultValueNumeric: 0
+              - column:
+                  name: dislikes
+                  type: INT
+                  defaultValueNumeric: 0
+
+  - changeSet:
+      id: 09-create-blog-table
+      author: jules
+      changes:
+        - createTable:
+            tableName: blog
+            columns:
+              - column:
+                  name: blog_id
+                  type: ${uuid.type}
+                  defaultValueComputed: ${uuid.function}
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: app_user
+                    referencedColumnNames: user_id
+                    foreignKeyName: fk_blog_user
+                    deleteCascade: true
+              - column:
+                  name: poi_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: point_of_interest
+                    referencedColumnNames: poi_id
+                    foreignKeyName: fk_blog_poi
+                    deleteCascade: true
+              - column:
+                  name: title
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: cover_image_url
+                  type: TEXT
+              - column:
+                  name: content
+                  type: TEXT
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+
+  - changeSet:
+      id: 10-create-podcast-table
+      author: jules
+      changes:
+        - createTable:
+            tableName: podcast
+            columns:
+              - column:
+                  name: podcast_id
+                  type: ${uuid.type}
+                  defaultValueComputed: ${uuid.function}
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: app_user
+                    referencedColumnNames: user_id
+                    foreignKeyName: fk_podcast_user
+                    deleteCascade: true
+              - column:
+                  name: poi_id
+                  type: ${uuid.type}
+                  constraints:
+                    nullable: false
+                    referencedTableName: point_of_interest
+                    referencedColumnNames: poi_id
+                    foreignKeyName: fk_podcast_poi
+                    deleteCascade: true
+              - column:
+                  name: title
+                  type: ${indexed_text.type}
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: cover_image_url
+                  type: TEXT
+              - column:
+                  name: audio_file_url
+                  type: TEXT
+              - column:
+                  name: duration_seconds
+                  type: INT
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: ${now.function}
+
+  - changeSet:
+      id: 11-create-remaining-indexes
+      author: jules
+      changes:
+        - createIndex:
+            tableName: poi_access_log
+            indexName: idx_access_log_poi
+            columns:
+              - column:
+                  name: poi_id
+        - createIndex:
+            tableName: poi_access_log
+            indexName: idx_access_log_org
+            columns:
+              - column:
+                  name: organization_id
+        - createIndex:
+            tableName: poi_access_log
+            indexName: idx_access_log_platform
+            columns:
+              - column:
+                  name: platform_type
+        - createIndex:
+            tableName: poi_access_log
+            indexName: idx_access_log_date
+            columns:
+              - column:
+                  name: access_datetime
+        - createIndex:
+            tableName: poi_review
+            indexName: idx_poi_review_poi_id
+            columns:
+              - column:
+                  name: poi_id
+        - createIndex:
+            tableName: poi_review
+            indexName: idx_poi_review_org
+            columns:
+              - column:
+                  name: organization_id
+        - createIndex:
+            tableName: poi_platform_stat
+            indexName: idx_stat_org_platform
+            columns:
+              - column:
+                  name: org_id
+              - column:
+                  name: platform_type
+              - column:
+                  name: stat_date
+        - createIndex:
+            tableName: blog
+            indexName: idx_blog_user_id
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            tableName: blog
+            indexName: idx_blog_poi_id
+            columns:
+              - column:
+                  name: poi_id
+        - createIndex:
+            tableName: podcast
+            indexName: idx_podcast_user_id
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            tableName: podcast
+            indexName: idx_podcast_poi_id
+            columns:
+              - column:
+                  name: poi_id
