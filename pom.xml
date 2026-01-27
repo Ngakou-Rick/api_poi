@@ -91,11 +91,23 @@
     		<version>2.5.0</version>
 		</dependency>
 
-		<!-- PostgreSQL JDBC Driver (pour les migrations Flyway si nécessaire) -->
+		<!-- PostgreSQL JDBC Driver (pour les migrations Liquibase) -->
 		<dependency>
-    		<groupId>org.postgresql</groupId>
-    		<artifactId>postgresql</artifactId>
-    	<scope>runtime</scope>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Liquibase -->
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+		</dependency>
+
+		<!-- JDBC Starter (Needed for Liquibase) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
 
 		<!-- R2DBC Pool pour la gestion des connexions -->
@@ -177,6 +189,13 @@
 		<dependency>
 			<groupId>io.r2dbc</groupId>
 			<artifactId>r2dbc-h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- JDBC H2 Driver for Liquibase in tests -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
