@@ -1,9 +1,12 @@
--- 1. Extensions nécessaires
+-- liquibase formatted sql
+
+-- changeset jules:1
+-- Extensions nécessaires
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Table des organisations
-CREATE TABLE IF NOT EXISTS organization (
+CREATE TABLE organization (
     organization_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     org_name TEXT NOT NULL,
     org_code TEXT UNIQUE,
@@ -13,7 +16,7 @@ CREATE TABLE IF NOT EXISTS organization (
 );
 
 -- Table des utilisateurs
-CREATE TABLE IF NOT EXISTS app_user (
+CREATE TABLE app_user (
     user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
     username TEXT NOT NULL,
@@ -26,7 +29,7 @@ CREATE TABLE IF NOT EXISTS app_user (
 );
 
 -- Table POI - Version R2DBC compatible
-CREATE TABLE IF NOT EXISTS point_of_interest (
+CREATE TABLE point_of_interest (
     poi_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID REFERENCES organization(organization_id),
     town_id UUID,
@@ -80,7 +83,7 @@ CREATE TABLE IF NOT EXISTS point_of_interest (
 );
 
 -- Table des logs d'accès
-CREATE TABLE IF NOT EXISTS poi_access_log (
+CREATE TABLE poi_access_log (
     access_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     poi_id UUID NOT NULL REFERENCES point_of_interest(poi_id) ON DELETE CASCADE,
     organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
@@ -93,7 +96,7 @@ CREATE TABLE IF NOT EXISTS poi_access_log (
 );
 
 -- Table des reviews
-CREATE TABLE IF NOT EXISTS poi_review (
+CREATE TABLE poi_review (
     review_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     poi_id UUID NOT NULL REFERENCES point_of_interest(poi_id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES app_user(user_id),
@@ -107,7 +110,7 @@ CREATE TABLE IF NOT EXISTS poi_review (
 );
 
 -- Table des statistiques
-CREATE TABLE IF NOT EXISTS poi_platform_stat (
+CREATE TABLE poi_platform_stat (
     stat_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     org_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
     poi_id UUID REFERENCES point_of_interest(poi_id) ON DELETE CASCADE,
@@ -120,7 +123,7 @@ CREATE TABLE IF NOT EXISTS poi_platform_stat (
 );
 
 -- Table des blogs
-CREATE TABLE IF NOT EXISTS blog (
+CREATE TABLE blog (
     blog_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
     poi_id UUID NOT NULL REFERENCES point_of_interest(poi_id) ON DELETE CASCADE,
@@ -134,7 +137,7 @@ CREATE TABLE IF NOT EXISTS blog (
 );
 
 -- Table des podcasts
-CREATE TABLE IF NOT EXISTS podcast (
+CREATE TABLE podcast (
     podcast_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
     poi_id UUID NOT NULL REFERENCES point_of_interest(poi_id) ON DELETE CASCADE,
@@ -149,30 +152,30 @@ CREATE TABLE IF NOT EXISTS podcast (
 );
 
 -- Index pour performance
-CREATE INDEX IF NOT EXISTS idx_poi_org_id ON point_of_interest (organization_id);
-CREATE INDEX IF NOT EXISTS idx_poi_type ON point_of_interest (poi_type);
-CREATE INDEX IF NOT EXISTS idx_poi_category ON point_of_interest (poi_category);
-CREATE INDEX IF NOT EXISTS idx_poi_name ON point_of_interest (poi_name);
-CREATE INDEX IF NOT EXISTS idx_poi_is_active ON point_of_interest (is_active);
+CREATE INDEX idx_poi_org_id ON point_of_interest (organization_id);
+CREATE INDEX idx_poi_type ON point_of_interest (poi_type);
+CREATE INDEX idx_poi_category ON point_of_interest (poi_category);
+CREATE INDEX idx_poi_name ON point_of_interest (poi_name);
+CREATE INDEX idx_poi_is_active ON point_of_interest (is_active);
 
-CREATE INDEX IF NOT EXISTS idx_access_log_poi ON poi_access_log (poi_id);
-CREATE INDEX IF NOT EXISTS idx_access_log_org ON poi_access_log (organization_id);
-CREATE INDEX IF NOT EXISTS idx_access_log_platform ON poi_access_log (platform_type);
-CREATE INDEX IF NOT EXISTS idx_access_log_date ON poi_access_log (access_datetime);
+CREATE INDEX idx_access_log_poi ON poi_access_log (poi_id);
+CREATE INDEX idx_access_log_org ON poi_access_log (organization_id);
+CREATE INDEX idx_access_log_platform ON poi_access_log (platform_type);
+CREATE INDEX idx_access_log_date ON poi_access_log (access_datetime);
 
-CREATE INDEX IF NOT EXISTS idx_poi_review_poi_id ON poi_review (poi_id);
-CREATE INDEX IF NOT EXISTS idx_poi_review_org ON poi_review (organization_id);
-CREATE INDEX IF NOT EXISTS idx_stat_org_platform ON poi_platform_stat (org_id, platform_type, stat_date);
+CREATE INDEX idx_poi_review_poi_id ON poi_review (poi_id);
+CREATE INDEX idx_poi_review_org ON poi_review (organization_id);
+CREATE INDEX idx_stat_org_platform ON poi_platform_stat (org_id, platform_type, stat_date);
 
-CREATE INDEX IF NOT EXISTS idx_poi_location_geog ON point_of_interest USING GIST (location_geog);
+CREATE INDEX idx_poi_location_geog ON point_of_interest USING GIST (location_geog);
 
 -- Index pour les nouvelles tables
-CREATE INDEX IF NOT EXISTS idx_blog_user_id ON blog (user_id);
-CREATE INDEX IF NOT EXISTS idx_blog_poi_id ON blog (poi_id);
-CREATE INDEX IF NOT EXISTS idx_blog_is_active ON blog (is_active);
-CREATE INDEX IF NOT EXISTS idx_blog_created_at ON blog (created_at);
+CREATE INDEX idx_blog_user_id ON blog (user_id);
+CREATE INDEX idx_blog_poi_id ON blog (poi_id);
+CREATE INDEX idx_blog_is_active ON blog (is_active);
+CREATE INDEX idx_blog_created_at ON blog (created_at);
 
-CREATE INDEX IF NOT EXISTS idx_podcast_user_id ON podcast (user_id);
-CREATE INDEX IF NOT EXISTS idx_podcast_poi_id ON podcast (poi_id);
-CREATE INDEX IF NOT EXISTS idx_podcast_is_active ON podcast (is_active);
-CREATE INDEX IF NOT EXISTS idx_podcast_created_at ON podcast (created_at);
+CREATE INDEX idx_podcast_user_id ON podcast (user_id);
+CREATE INDEX idx_podcast_poi_id ON podcast (poi_id);
+CREATE INDEX idx_podcast_is_active ON podcast (is_active);
+CREATE INDEX idx_podcast_created_at ON podcast (created_at);
