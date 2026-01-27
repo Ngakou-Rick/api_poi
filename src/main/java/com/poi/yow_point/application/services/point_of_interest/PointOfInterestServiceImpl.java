@@ -115,15 +115,35 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
     @Override
     public Mono<PointOfInterestDTO> findById(UUID poiId) {
         String cacheKey = CACHE_KEY_PREFIX + poiId;
-        return redisTemplate.opsForValue().get(cacheKey)
+
+        return redisTemplate.opsForValue()
+                .get(cacheKey)
+                .onErrorResume(e -> {
+                    log.warn("Redis unavailable (GET), falling back to DB for POI {}: {}", poiId, e.getMessage());
+                    return Mono.empty(); // 🔥 tolérance Redis
+                })
                 .doOnNext(dto -> log.debug("Cache hit for POI: {}", poiId))
                 .switchIfEmpty(
                         repository.findById(poiId)
                                 .map(mapper::toDto)
-                                .flatMap(dto -> redisTemplate.opsForValue().set(cacheKey, dto, CACHE_TTL).thenReturn(dto))
-                                .doOnNext(dto -> log.debug("Cache miss for POI: {}, saved to cache with TTL {}", poiId, CACHE_TTL)))
-                .doOnError(error -> log.error("Error finding POI {}: {}", poiId, error.getMessage()));
+                                .flatMap(dto ->
+                                        redisTemplate.opsForValue()
+                                                .set(cacheKey, dto, CACHE_TTL)
+                                                .onErrorResume(e -> {
+                                                    log.warn("Redis unavailable (SET) for POI {}: {}", poiId, e.getMessage());
+                                                    return Mono.empty(); // 🔥 Redis non bloquant
+                                                })
+                                                .thenReturn(dto)
+                                )
+                                .doOnNext(dto ->
+                                        log.debug("Cache miss for POI: {}, saved to cache with TTL {}", poiId, CACHE_TTL)
+                                )
+                )
+                .doOnError(error ->
+                        log.error("Error finding POI {} (DB level): {}", poiId, error.getMessage())
+                );
     }
+
 
     @Override
     public Flux<PointOfInterestDTO> findActiveByOrganizationId(UUID organizationId) {
