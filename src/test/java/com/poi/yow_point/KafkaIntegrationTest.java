@@ -38,9 +38,6 @@ class KafkaIntegrationTest {
     private PointOfInterestRepository pointOfInterestRepository;
 
     @MockBean
-    private com.poi.yow_point.infrastructure.repositories.poiDocument.PoiDocumentRepository poiDocumentRepository;
-
-    @MockBean
     private org.springframework.data.redis.core.ReactiveRedisTemplate<String, PointOfInterestDTO> redisTemplate;
 
     @MockBean
