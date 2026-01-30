@@ -321,6 +321,14 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                 .doOnError(error -> log.error("Error checking POI name existence: {}", error.getMessage()));
     }
 
+    @Override
+    public Flux<PointOfInterestDTO> findAll() {
+        return repository.findAll()
+                .map(mapper::toDto)
+                .doOnComplete(() -> log.debug("Retrieved all POIs"))
+                .doOnError(error -> log.error("Error retrieving all POIs: {}", error.getMessage()));
+    }
+
     private Mono<PointOfInterestDTO> validateDto(PointOfInterestDTO dto) {
         return Mono.fromCallable(() -> {
             Errors errors = new BeanPropertyBindingResult(dto, "pointOfInterestDTO");
