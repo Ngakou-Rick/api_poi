@@ -92,4 +92,13 @@ public class PointOfInterestRepositoryImpl implements PointOfInterestRepositoryC
 
                 return entityTemplate.exists(Query.query(criteria), PointOfInterest.class);
         }
+
+        @Override
+        public Flux<PointOfInterest> findRecent(Integer limit) {
+                return entityTemplate.select(PointOfInterest.class)
+                                .matching(Query.query(Criteria.empty())
+                                                .sort(org.springframework.data.domain.Sort.by("created_at").descending())
+                                                .limit(limit))
+                                .all();
+        }
 }

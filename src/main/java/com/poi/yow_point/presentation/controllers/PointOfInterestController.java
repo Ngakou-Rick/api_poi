@@ -433,4 +433,41 @@ public class PointOfInterestController {
                                                                         .build());
                                                 });
         }
+
+        @GetMapping("/count")
+        @Operation(summary = "Count all POIs", description = "Returns the total number of Points of Interest in the database")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Total count of POIs", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Long.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+        })
+        public Mono<ResponseEntity<Long>> getPoiCount() {
+                log.debug("REST request to count all POIs");
+                return poiService.countAll()
+                                .map(count -> ResponseEntity.ok(count))
+                                .onErrorResume(Exception.class,
+                                                ex -> {
+                                                        log.error("Error counting all POIs", ex);
+                                                        return Mono.just(ResponseEntity
+                                                                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                                        .build());
+                                                });
+        }
+
+        @GetMapping("/recent")
+        @Operation(summary = "Get recent POIs", description = "Retrieves the most recently created Points of Interest")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "List of recent POIs", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PointOfInterestDTO.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+        })
+        public Flux<PointOfInterestDTO> getRecentPois(
+                        @Parameter(description = "Maximum number of POIs to return", example = "10") @RequestParam(defaultValue = "10") Integer limit) {
+                log.debug("REST request to get top {} recent POIs", limit);
+
+                return poiService.findRecent(limit)
+                                .onErrorResume(Exception.class,
+                                                ex -> {
+                                                        log.error("Error retrieving recent POIs", ex);
+                                                        return Flux.empty();
+                                                });
+        }
 }

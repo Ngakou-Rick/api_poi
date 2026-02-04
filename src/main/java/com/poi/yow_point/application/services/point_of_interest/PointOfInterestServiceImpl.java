@@ -362,6 +362,21 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                 .doOnError(error -> log.error("Error retrieving all POIs: {}", error.getMessage()));
     }
 
+    @Override
+    public Mono<Long> countAll() {
+        return repository.count()
+                .doOnSuccess(count -> log.debug("Total POI count: {}", count))
+                .doOnError(error -> log.error("Error counting all POIs: {}", error.getMessage()));
+    }
+
+    @Override
+    public Flux<PointOfInterestDTO> findRecent(Integer limit) {
+        return repository.findRecent(limit)
+                .map(mapper::toDto)
+                .doOnComplete(() -> log.debug("Retrieved recent {} POIs", limit))
+                .doOnError(error -> log.error("Error retrieving recent POIs: {}", error.getMessage()));
+    }
+
     private Mono<PointOfInterestDTO> validateDto(PointOfInterestDTO dto) {
         return Mono.fromCallable(() -> {
             Errors errors = new BeanPropertyBindingResult(dto, "pointOfInterestDTO");

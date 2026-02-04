@@ -45,4 +45,8 @@ public interface PointOfInterestService {
     Mono<Boolean> existsByNameAndOrganization(String name, UUID organizationId, UUID excludeId);
 
     Flux<PointOfInterestDTO> findAll();
+
+    Mono<Long> countAll();
+
+    Flux<PointOfInterestDTO> findRecent(Integer limit);
 }
