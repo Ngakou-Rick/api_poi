@@ -161,17 +161,17 @@ public class PointOfInterestController {
                                                 });
         }
 
-        @GetMapping("/location")
-        @Operation(summary = "Search for POIs by location", description = "Searches for Points of Interest within a given radius around a geographical position")
+        @GetMapping("/nearby")
+        @Operation(summary = "Search for POIs around a location", description = "Searches for Points of Interest within a given radius around a geographical position")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "POIs found in the area", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PointOfInterestDTO.class))),
                         @ApiResponse(responseCode = "400", description = "Invalid location parameters", content = @Content),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
         })
         public Flux<PointOfInterestDTO> getPoisByLocation(
-                        @Parameter(description = "Latitude", required = true, example = "3.8480") @RequestParam Double latitude,
-                        @Parameter(description = "Longitude", required = true, example = "11.5021") @RequestParam Double longitude,
-                        @Parameter(description = "Search radius in kilometers", example = "5.0") @RequestParam(defaultValue = "10.0") Double radiusKm) {
+                        @Parameter(description = "Latitude", required = true, schema = @Schema(type = "number", format = "double", example = "3.8480")) @RequestParam Double latitude,
+                        @Parameter(description = "Longitude", required = true, schema = @Schema(type = "number", format = "double", example = "11.5021")) @RequestParam Double longitude,
+                        @Parameter(description = "Search radius in kilometers", schema = @Schema(type = "number", format = "double", example = "5.0", defaultValue = "10.0")) @RequestParam(defaultValue = "10.0") Double radiusKm) {
                 log.debug("REST request to get POIs by location: {}, {} within {} km",
                                 latitude, longitude, radiusKm);
 
