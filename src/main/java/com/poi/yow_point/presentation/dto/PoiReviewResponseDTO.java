@@ -11,11 +11,10 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PoiReviewDTO {
+public class PoiReviewResponseDTO {
     private UUID reviewId;
     private UUID poiId;
     private UUID userId;
-    private UUID organizationId;
     private String platformType;
     private Integer rating;
     private String reviewText;

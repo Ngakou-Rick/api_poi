@@ -15,8 +15,8 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("poi_review")
-public class PoiReview {
+@Table("review")
+public class Review implements org.springframework.data.domain.Persistable<UUID> {
 
     @Id
     @Column("review_id")
@@ -25,11 +25,14 @@ public class PoiReview {
     @Column("poi_id")
     private UUID poiId;
 
+    @Column("blog_id")
+    private UUID blogId;
+
+    @Column("podcast_id")
+    private UUID podcastId;
+
     @Column("user_id")
     private UUID userId;
-
-    @Column("organization_id")
-    private UUID organizationId;
 
     @Column("platform_type")
     private String platformType; // Plateforme source du review
@@ -52,4 +55,21 @@ public class PoiReview {
     @Column("dislikes")
     @Builder.Default
     private Integer dislikes = 0;
+
+    @org.springframework.data.annotation.Transient
+    @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private boolean isNew = false;
+
+    @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public UUID getId() {
+        return reviewId;
+    }
+
+    @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public boolean isNew() {
+        return isNew || reviewId == null;
+    }
 }
