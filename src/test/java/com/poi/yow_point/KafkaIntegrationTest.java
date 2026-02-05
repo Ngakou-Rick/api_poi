@@ -4,6 +4,7 @@ import com.poi.yow_point.application.services.point_of_interest.PointOfInterestS
 import com.poi.yow_point.infrastructure.entities.PointOfInterest;
 import com.poi.yow_point.infrastructure.repositories.PointOfInterest.PointOfInterestRepository;
 import com.poi.yow_point.presentation.dto.PointOfInterestDTO;
+import com.poi.yow_point.presentation.dto.CreatePoiDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,27 +67,28 @@ class KafkaIntegrationTest {
     @Test
     void whenCreatePoi_thenMessageSentToKafka() throws Exception {
         // Given
-        PointOfInterestDTO poiDto = new PointOfInterestDTO();
-        poiDto.setPoiName("Test POI From Test");
-        poiDto.setOrganizationId(UUID.randomUUID());
-        poiDto.setPoiCategory(com.poi.yow_point.application.model.PoiCategory.FOOD_DRINK);
-        poiDto.setPoiType(com.poi.yow_point.application.model.PoiType.RESTAURANT);
-        poiDto.setAddressStreetName("Test Address");
-        poiDto.setAddressCity("Test City");
-        poiDto.setAddressCountry("Test Country");
-        poiDto.setLatitude(0.0);
-        poiDto.setLongitude(0.0);
+        CreatePoiDTO createDto = new CreatePoiDTO();
+        createDto.setPoiName("Test POI From Test");
+        createDto.setOrganizationId(UUID.randomUUID());
+        createDto.setCreatedByUserId(UUID.randomUUID());
+        createDto.setPoiCategory(com.poi.yow_point.application.model.PoiCategory.FOOD_DRINK);
+        createDto.setPoiType(com.poi.yow_point.application.model.PoiType.RESTAURANT);
+        createDto.setAddressStreetName("Test Address");
+        createDto.setAddressCity("Test City");
+        createDto.setAddressCountry("Test Country");
+        createDto.setLatitude(0.0);
+        createDto.setLongitude(0.0);
 
         PointOfInterest savedEntity = new PointOfInterest();
         savedEntity.setPoiId(UUID.randomUUID());
-        savedEntity.setPoiName(poiDto.getPoiName());
-        savedEntity.setOrganizationId(poiDto.getOrganizationId());
+        savedEntity.setPoiName(createDto.getPoiName());
+        savedEntity.setOrganizationId(createDto.getOrganizationId());
 
         when(pointOfInterestRepository.existsByNameAndOrganizationIdExcludingId(any(), any(), any())).thenReturn(Mono.just(false));
         when(pointOfInterestRepository.save(any(PointOfInterest.class))).thenReturn(Mono.just(savedEntity));
 
         // When
-        pointOfInterestService.createPoi(poiDto).block();
+        pointOfInterestService.createPoi(createDto).block();
 
         // Then
         org.mockito.Mockito.verify(kafkaProducerService).sendMessage(org.mockito.ArgumentMatchers.eq("poi-created"), org.mockito.ArgumentMatchers.any(PointOfInterestDTO.class));

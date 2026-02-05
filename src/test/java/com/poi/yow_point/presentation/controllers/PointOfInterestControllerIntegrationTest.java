@@ -55,7 +55,6 @@ class PointOfInterestControllerIntegrationTest {
 
         testPoiDto = PointOfInterestDTO.builder()
                 .organizationId(organizationId)
-                .townId(UUID.randomUUID())
                 .createdByUserId(UUID.randomUUID())
                 .poiName("Test POI")
                 .poiType(PoiType.RESTAURANT)

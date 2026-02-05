@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,10 +16,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PointOfInterestDTO {
-
-    @JsonProperty("poi_id")
-    private UUID poiId;
+public class CreatePoiDTO {
 
     @JsonProperty("organization_id")
     private UUID organizationId;
@@ -88,8 +84,6 @@ public class PointOfInterestDTO {
     @JsonProperty("poi_contacts")
     private Map<String, Object> poiContacts;
 
-
-
     @JsonProperty("poi_images_urls")
     private List<String> poiImagesUrls;
 
@@ -101,31 +95,4 @@ public class PointOfInterestDTO {
 
     @JsonProperty("poi_type_tags")
     private List<String> poiTypeTags;
-
-    @JsonProperty("popularity_score")
-    private Float popularityScore;
-
-    @JsonProperty("is_active")
-    private Boolean isActive;
-
-    @JsonProperty("deactivation_reason")
-    private String deactivationReason;
-
-    @JsonProperty("deactivated_by_user_id")
-    private UUID deactivatedByUserId;
-
-    @JsonProperty("status")
-    private com.poi.yow_point.application.model.PoiStatus status;
-
-    @JsonProperty("approuved_by_user_id")
-    private UUID approuvedByUserId;
-
-    @JsonProperty("created_at")
-    private Instant createdAt;
-
-    @JsonProperty("updated_by_user_id")
-    private UUID updatedByUserId;
-
-    @JsonProperty("updated_at")
-    private Instant updatedAt;
 }

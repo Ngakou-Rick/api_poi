@@ -2,6 +2,7 @@ package com.poi.yow_point.infrastructure.entities;
 
 import com.poi.yow_point.application.model.PoiCategory;
 import com.poi.yow_point.application.model.PoiType;
+import com.poi.yow_point.application.model.PoiStatus;
 import io.r2dbc.postgresql.codec.Json;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,9 +32,6 @@ public class PointOfInterest {
 
     @Column("organization_id")
     private UUID organizationId;
-
-    @Column("town_id")
-    private UUID townId;
 
     @Column("created_by_user_id")
     private UUID createdByUserId;
@@ -125,8 +123,16 @@ public class PointOfInterest {
     @Column("updated_by_user_id")
     private UUID updatedByUserId;
 
+
+    @Column("status")
+    private PoiStatus status;
+
+    @Column("approuved_by_user_id")
+    private UUID approuvedByUserId;
+
     @Column("updated_at")
     private Instant updatedAt;
+
 
 
     // --- Helper methods for comma-separated string fields ---

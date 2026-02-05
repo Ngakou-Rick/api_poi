@@ -3,3 +3,7 @@ databaseChangeLog:
       file: db/changelog/changes/01-initial-schema.xml
   - include:
       file: db/changelog/changes/10-refactor-review-table.xml
+  - include:
+      file: db/changelog/changes/09-update-poi-schema.xml
+  - include:
+      file: db/changelog/changes/10-remove-town-id.xml
