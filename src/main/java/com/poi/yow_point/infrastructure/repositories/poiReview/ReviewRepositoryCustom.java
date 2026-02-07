@@ -22,4 +22,8 @@ public interface ReviewRepositoryCustom {
     Mono<Double> findAverageRatingByPoiId(UUID poiId);
 
     Mono<Long> countByPoiId(UUID poiId);
+
+    Mono<Double> findGlobalAverageRating();
+
+    Mono<Long> countTotalReviews();
 }

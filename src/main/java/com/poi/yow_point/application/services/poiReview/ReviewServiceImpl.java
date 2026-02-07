@@ -23,7 +23,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final R2dbcEntityTemplate entityTemplate;
-    // private final PoiEventPublisher eventPublisher; // Keep if needed
+    private final PopularityScoreService popularityScoreService;
 
     @Override
     public Mono<PoiReviewResponseDTO> createReviewForPoi(UUID poiId, ReviewRequestDTO reviewDTO) {
@@ -34,7 +34,8 @@ public class ReviewServiceImpl implements ReviewService {
                     return review;
                 })
                 .flatMap(reviewRepository::save)
-                .map(this::toPoiReviewResponseDTO);
+                .flatMap(savedReview -> popularityScoreService.updatePoiPopularityScore(poiId)
+                        .thenReturn(toPoiReviewResponseDTO(savedReview)));
     }
 
     @Override
@@ -118,12 +119,25 @@ public class ReviewServiceImpl implements ReviewService {
                     return review;
                 })
                 .flatMap(reviewRepository::save)
-                .map(this::toResponseDTO);
+                .flatMap(savedReview -> {
+                    if (savedReview.getPoiId() != null) {
+                        return popularityScoreService.updatePoiPopularityScore(savedReview.getPoiId())
+                                .thenReturn(toResponseDTO(savedReview));
+                    }
+                    return Mono.just(toResponseDTO(savedReview));
+                });
     }
 
     @Override
+    @Transactional
     public Mono<Void> deleteReview(UUID reviewId) {
-        return reviewRepository.deleteById(reviewId);
+        return reviewRepository.findById(reviewId)
+                .flatMap(review -> {
+                    UUID poiId = review.getPoiId();
+                    return reviewRepository.deleteById(reviewId)
+                            .then(Mono.defer(() -> poiId != null ? 
+                                    popularityScoreService.updatePoiPopularityScore(poiId) : Mono.empty()));
+                });
     }
 
     @Override

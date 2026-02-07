@@ -76,4 +76,20 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
                 .one()
                 .defaultIfEmpty(0L);
     }
+
+    @Override
+    public Mono<Double> findGlobalAverageRating() {
+        return databaseClient.sql("SELECT AVG(rating) FROM review")
+                .map(row -> row.get(0, Double.class))
+                .one()
+                .defaultIfEmpty(3.0); // Neutral default
+    }
+
+    @Override
+    public Mono<Long> countTotalReviews() {
+        return databaseClient.sql("SELECT COUNT(*) FROM review")
+                .map(row -> row.get(0, Long.class))
+                .one()
+                .defaultIfEmpty(0L);
+    }
 }
