@@ -71,7 +71,17 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                 .map(mapper::toDto)
                 .doOnSuccess(savedDto -> {
                     log.info("POI created successfully with ID: {}. Status: SUBMITTED.", savedDto.getPoiId());
-                    // Notify admins? Or just log.
+                    
+                    // Notify user about submission
+                    if (savedDto.getCreatedByUserId() != null) {
+                        appUserService.getUserById(savedDto.getCreatedByUserId())
+                                .flatMap(userDto -> notificationService.notifyPoiSubmitted(savedDto, userDto))
+                                .onErrorResume(e -> {
+                                    log.error("Failed to send submission notification: {}", e.getMessage());
+                                    return Mono.empty();
+                                })
+                                .subscribe();
+                    }
                 })
                 .doOnError(error -> log.error("Error creating POI: {}", error.getMessage()));
     }
@@ -277,14 +287,17 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
                     poi.setUpdatedAt(Instant.now());
                     return repository.save(poi);
                 })
-                .flatMap(saved -> {
-                    // Notify user
+                .doOnSuccess(saved -> {
+                    // Notify user about approval
                     if (saved.getCreatedByUserId() != null) {
-                        return appUserService.getUserById(saved.getCreatedByUserId())
-                                .flatMap(userDto -> notificationService.notifyPoiCreated(mapper.toDto(saved), userDto)) // Reusing created notification or create generic approved? Assuming create for now or generic
-                                .then(Mono.just(saved));
+                        appUserService.getUserById(saved.getCreatedByUserId())
+                                .flatMap(userDto -> notificationService.notifyPoiApproved(mapper.toDto(saved), userDto))
+                                .onErrorResume(e -> {
+                                    log.error("Failed to send approval notification: {}", e.getMessage());
+                                    return Mono.empty();
+                                })
+                                .subscribe();
                     }
-                    return Mono.just(saved);
                 })
                 .then();
     }
@@ -295,14 +308,17 @@ public class PointOfInterestServiceImpl implements PointOfInterestService {
         return redisTemplate.opsForValue().delete(CACHE_KEY_PREFIX + poiId)
                 .then(repository.findById(poiId))
                 .flatMap(poi -> {
-                    // Notify user BEFORE deleting (so we have data)
-                     Mono<Void> notification = Mono.empty();
-                     if (poi.getCreatedByUserId() != null) {
-                         notification = appUserService.getUserById(poi.getCreatedByUserId())
-                                 .flatMap(userDto -> notificationService.notifyPoiCreated(mapper.toDto(poi), userDto)) // Should probably have rejected notification
-                                 .then();
-                     }
-                     return notification.then(repository.delete(poi));
+                    // Notify user about rejection BEFORE deleting (so we have user data)
+                    if (poi.getCreatedByUserId() != null) {
+                        appUserService.getUserById(poi.getCreatedByUserId())
+                                .flatMap(userDto -> notificationService.notifyPoiRejected(mapper.toDto(poi), userDto))
+                                .onErrorResume(e -> {
+                                    log.error("Failed to send rejection notification: {}", e.getMessage());
+                                    return Mono.empty();
+                                })
+                                .subscribe();
+                    }
+                    return repository.delete(poi);
                 })
                 .then();
     }

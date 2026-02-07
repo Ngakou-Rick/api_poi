@@ -58,7 +58,7 @@ public class PointOfInterest {
     private String poiDescription;
 
     @Column("poi_logo")
-    private byte[] poiLogo;
+    private String poiLogo;
 
     @Column("location_geog")
     private Point locationGeog;

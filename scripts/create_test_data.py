@@ -32,7 +32,7 @@ def main():
     # 1. Create 3 Organizations
     print("\n--- Creating 3 Organizations ---")
     orgs = []
-    org_types = ["MERCHANT", "DISTRIBUTOR", "SUPPLIER"]
+    org_types = ["SARL", "SA", "SAS"]
     org_names = ["Restaurant Le Paradis", "Tech Distributors SA", "Agriculture Supplies Ltd"]
     
     for i in range(3):

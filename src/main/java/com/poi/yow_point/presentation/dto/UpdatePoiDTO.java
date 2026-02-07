@@ -46,7 +46,7 @@ public class UpdatePoiDTO {
     private String poiDescription;
 
     @JsonProperty("poi_logo")
-    private byte[] poiLogo;
+    private String poiLogo;
 
     @JsonProperty("latitude")
     private Double latitude;
