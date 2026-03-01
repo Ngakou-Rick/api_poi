@@ -196,12 +196,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Elasticsearch -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
-		</dependency>
-
 		<!-- Redis (includes Reactive support) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

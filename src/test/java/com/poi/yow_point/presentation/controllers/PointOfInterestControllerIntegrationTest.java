@@ -5,7 +5,6 @@ import com.poi.yow_point.application.model.PoiType;
 import com.poi.yow_point.infrastructure.entities.PointOfInterest;
 import com.poi.yow_point.infrastructure.kafka.KafkaProducerService;
 import com.poi.yow_point.infrastructure.repositories.PointOfInterest.PointOfInterestRepository;
-import com.poi.yow_point.infrastructure.repositories.poiDocument.PoiDocumentRepository;
 import com.poi.yow_point.presentation.dto.PointOfInterestDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,9 +38,6 @@ class PointOfInterestControllerIntegrationTest {
 
     @MockBean
     private PointOfInterestRepository pointOfInterestRepository;
-
-    @MockBean
-    private PoiDocumentRepository poiDocumentRepository;
 
     @MockBean
     private KafkaProducerService kafkaProducerService;
